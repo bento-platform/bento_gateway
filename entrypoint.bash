@@ -17,7 +17,31 @@ done
 echo "[bento_gateway] [entrypoint] writing main NGINX configuration"
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/nginx.conf.tpl \
-  > /usr/local/openresty/nginx/conf/nginx.conf
+  > ./nginx.conf.pre
+
+# Run fine-tuning on nginx.conf.pre
+if [[ ${BENTOV2_USE_EXTERNAL_IDP} == 1 ]]; then
+  echo "Fine-tuning nginx.conf to use an external IDP"
+  sed -i.bak \
+    '/-- Internal IDP Starts Here --/,/-- Internal IDP Ends Here --/d'
+    ./nginx.conf.pre
+else
+  echo "Fine-tuning nginx.conf to use an internal IDP"
+fi
+if [[ ${BENTOV2_USE_BENTO_PUBLIC} == 1 ]]; then
+  echo "Fine-tuning nginx.conf to use bento_public"
+  sed -i.bak \
+    '/-- Do Not Use Bento-Public Starts Here --/,/-- Do Not Use Bento-Public Ends Here --/d' \
+    ./nginx.conf.pre; \
+else
+  echo "Fine tuning nginx.conf to disable Bento-Public"
+  sed -i.bak \
+    '/-- Use Bento-Public Starts Here --/,/-- Use Bento-Public Ends Here --/d' \
+    ./nginx.conf.pre
+fi
+
+# Move nginx.conf into position
+cp ./nginx.conf.pre /usr/local/openresty/nginx/conf/nginx.conf
 
 # Process any service templates, using only the selected variables:
 echo "[bento_gateway] [entrypoint] writing service NGINX configuration"
