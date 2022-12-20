@@ -167,8 +167,6 @@ local CHORD_DEBUG = stringtoboolean[os.getenv("CHORD_DEBUG")]
 local CHORD_PERMISSIONS = os.getenv("CHORD_PERMISSIONS")
 if CHORD_PERMISSIONS == nil then CHORD_PERMISSIONS = true end
 
-local CHORD_PRIVATE_MODE = stringtoboolean[os.getenv("CHORD_PRIVATE_MODE")]
-
 -- If in production, validate the SSL certificate if HTTPS is being used (for
 -- non-Lua folks, this is a ternary - ssl_verify = !chord_debug)
 local opts_ssl_verify = "no"
@@ -228,9 +226,10 @@ local REQUEST_METHOD = ngx.var.request_method or "GET"
 local is_api_uri = not (not URI:match("^/api"))
 
 -- Private URIs don't exist if the CHORD_PERMISSIONS flag is off (for dev)
--- All URIs are effectively "private" externally for CHORD_PRIVATE_MODE nodes
+-- All URIs are effectively "private" externally
+-- (used to be controlled by CHORD_PRIVATE_MODE)
 local is_private_uri = CHORD_PERMISSIONS and (
-  (CHORD_PRIVATE_MODE and not URI:match("^/api/auth")) or
+  not URI:match("^/api/auth") or
   URI:match("^/api/%a[%w-_]*/private"))
 
 
