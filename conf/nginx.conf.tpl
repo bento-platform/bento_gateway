@@ -195,6 +195,7 @@ http {
         }
 
         # Include all service location blocks (mounted into the container)
-        include bento_services/*;
+        # Don't include template files (.conf.tpl), just processed .conf files
+        include bento_services/*.conf;
     }
 }
