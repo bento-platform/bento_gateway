@@ -3,7 +3,7 @@
 # WORKDIR: /gateway
 
 # Gather a list of all environment variables to use for the NGINX conf. template:
-touch ./VARIABLES
+touch ./VARIABLES  # May already exist
 echo "[bento_gateway] [entrypoint] gathering environment variables for configuration templates"
 for v in $(env | awk -F "=" '{print $1}' | grep "BENTO*"); do
   echo "\${${v}}" >> ./VARIABLES
