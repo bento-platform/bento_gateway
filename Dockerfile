@@ -7,6 +7,5 @@ COPY LICENSE LICENSE
 COPY conf conf
 COPY src src
 COPY entrypoint.bash entrypoint.bash
-COPY VARIABLES VARIABLES
 
 ENTRYPOINT ["bash", "./entrypoint.bash"]
