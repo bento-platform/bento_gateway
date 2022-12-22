@@ -26,7 +26,8 @@ http {
                            '"$request" $status $body_bytes_sent '
                            '"$http_referer" "$http_user_agent" "$gzip_ratio" "$uri"';
 
-    limit_req_zone $binary_remote_addr zone=global_limit:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=perip:10m rate=10r/s;
+    limit_req_zone $server_name zone=perserver:10m rate=30r/s;
 
     # Redirect all http to https
     server {
@@ -63,8 +64,6 @@ http {
         # --
 
         location / {
-            limit_req zone=global_limit burst=10;
-
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
 
@@ -95,8 +94,6 @@ http {
         # -- Use Bento-Public Starts Here --
         # Public Web
         location / {
-            limit_req zone=global_limit burst=10;
-
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
 
@@ -109,8 +106,6 @@ http {
         # -- Beacon
         #  - Beacon is in the "Bento Public" namespace, since it yields public data.
         location ~ /api/beacon {
-            limit_req zone=global_limit burst=10;
-
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
             include /gateway/conf/proxy_extra.conf;
@@ -164,13 +159,12 @@ http {
 
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
+            include /gateway/conf/proxy_private.conf;
 
             set $request_url $request_uri;
             set $url $uri;
 
             set_by_lua_block $original_uri { return ngx.var.uri }
-
-            access_by_lua_file /gateway/src/proxy_auth.lua;
 
             set $upstream_web http://${BENTOV2_WEB_CONTAINER_NAME}:${BENTOV2_WEB_INTERNAL_PORT};
 

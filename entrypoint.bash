@@ -46,10 +46,13 @@ rm ./nginx.conf.pre*  # Remove pre-final file + any backups
 
 # Process any service templates, using only the selected variables:
 echo "[bento_gateway] [entrypoint] writing service NGINX configuration"
-for f in $(ls /usr/local/openresty/nginx/conf/bento_services/*.conf.tpl); do
-  outfile="${f%%.*}.conf"
+for f in $(ls /gateway/services/*.conf.tpl); do
+  filename=$(basename -- "$f")
+  outfile="${filename%%.*}.conf"
   echo "[bento_gateway] [entrypoint]    writing ${outfile}"
-  envsubst "$(cat ./VARIABLES)" < "${f}" > "${outfile}"
+  envsubst "$(cat ./VARIABLES)" \
+    < "${f}" \
+    > "/usr/local/openresty/nginx/conf/bento_services/${outfile}"
 done
 
 # Start OpenResty
