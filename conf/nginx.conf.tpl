@@ -53,8 +53,8 @@ http {
 
         server_name ${BENTOV2_AUTH_DOMAIN};
 
-        ssl_certificate ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_AUTH_FULLCHAIN_RELATIVE_PATH};
-        ssl_certificate_key ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_AUTH_PRIVKEY_RELATIVE_PATH};
+        ssl_certificate ${GATEWAY__INTERNAL_CERTS_DIR}${GATEWAY__INTERNAL_AUTH_FULLCHAIN_RELATIVE_PATH};
+        ssl_certificate_key ${GATEWAY__INTERNAL_CERTS_DIR}${GATEWAY__INTERNAL_AUTH_PRIVKEY_RELATIVE_PATH};
 
 
         # Security --
@@ -82,11 +82,11 @@ http {
 
         server_name ${BENTOV2_DOMAIN};
 
-        ssl_certificate ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_FULLCHAIN_RELATIVE_PATH};
-        ssl_certificate_key ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_PRIVKEY_RELATIVE_PATH};
+        ssl_certificate ${GATEWAY__INTERNAL_CERTS_DIR}${GATEWAY__INTERNAL_FULLCHAIN_RELATIVE_PATH};
+        ssl_certificate_key ${GATEWAY__INTERNAL_CERTS_DIR}${GATEWAY__INTERNAL_PRIVKEY_RELATIVE_PATH};
 
         # Security --
-        add_header Content-Security-Policy "frame-src 'self' ${BENTOV2_GATEWAY_PUBLIC_ALLOW_FRAME_DOMAINS};";
+        add_header Content-Security-Policy "frame-src 'self' ${GATEWAY__PUBLIC_ALLOW_FRAME_DOMAINS};";
         add_header X-XSS-Protection "1; mode=block";
         add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
         # --
@@ -133,8 +133,8 @@ http {
 
         server_name ${BENTOV2_PORTAL_DOMAIN};
 
-        ssl_certificate ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_PORTAL_FULLCHAIN_RELATIVE_PATH};
-        ssl_certificate_key ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_PORTAL_PRIVKEY_RELATIVE_PATH};
+        ssl_certificate ${GATEWAY__INTERNAL_CERTS_DIR}${GATEWAY__INTERNAL_PORTAL_FULLCHAIN_RELATIVE_PATH};
+        ssl_certificate_key ${GATEWAY__INTERNAL_CERTS_DIR}${GATEWAY__INTERNAL_PORTAL_PRIVKEY_RELATIVE_PATH};
 
         # Security --
         add_header X-Frame-Options "SAMEORIGIN";
