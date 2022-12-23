@@ -155,9 +155,6 @@ http {
 
         # Web
         location / {
-            limit_req zone=perip burst=30 nodelay;
-            limit_req zone=perserver burst=90;
-
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
             include /gateway/conf/proxy_private.conf;
