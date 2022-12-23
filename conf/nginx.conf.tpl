@@ -155,7 +155,8 @@ http {
 
         # Web
         location / {
-            limit_req zone=global_limit burst=10;
+            limit_req zone=perip burst=30 nodelay;
+            limit_req zone=perserver burst=90;
 
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
@@ -176,14 +177,16 @@ http {
         # --- All API stuff -- /api/* ---
         # -- Public node-info
         location = /api/node-info {
-            limit_req zone=global_limit burst=10;
+            limit_req zone=perip burst=30 nodelay;
+            limit_req zone=perserver burst=90;
             set_by_lua_block $original_uri { return ngx.var.uri }
             content_by_lua_file /gateway/src/node_info.lua;
         }
 
         # -- User Auth
         location ~ /api/auth {
-            limit_req zone=global_limit burst=10;
+            limit_req zone=perip burst=30 nodelay;
+            limit_req zone=perserver burst=90;
             set_by_lua_block $original_uri { return ngx.var.uri }
             content_by_lua_file /gateway/src/proxy_auth.lua;
         }
