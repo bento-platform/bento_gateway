@@ -60,4 +60,4 @@ done
 
 # Start OpenResty
 echo "[bento_gateway] [entrypoint] starting OpenResty"
-/usr/bin/openresty -g 'daemon off;'
+/usr/local/openresty/bin/openresty -g 'daemon off;'
