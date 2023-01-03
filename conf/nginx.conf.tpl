@@ -14,6 +14,8 @@ env TOKEN_ENDPOINT_AUTH_METHOD;
 # TODO: move to secret instead of using env
 env CLIENT_SECRET;
 
+error_log stderr info;
+
 events {
     worker_connections 1024;
 }
@@ -67,9 +69,9 @@ http {
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
 
-            set $upstream_auth http://bentov2-auth:8080;
+            set $upstream_auth http://${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
 
-            proxy_pass    $upstream_auth;
+            proxy_pass $upstream_auth;
             error_log /var/log/bentov2_auth_errors.log;
         }
     }
@@ -114,7 +116,7 @@ http {
             rewrite /api/beacon/(.*) /$1  break;
 
             # Forward request to beacon
-            proxy_pass    http://${BEACON_CONTAINER_NAME}:${BEACON_INTERNAL_PORT}/$1$is_args$args;
+            proxy_pass http://${BEACON_CONTAINER_NAME}:${BEACON_INTERNAL_PORT}/$1$is_args$args;
 
             # Errors
             error_log /var/log/bentov2_beacon_errors.log;
@@ -162,13 +164,10 @@ http {
             set $request_url $request_uri;
             set $url $uri;
 
-            set_by_lua_block $original_uri { return ngx.var.uri }
-
             set $upstream_web http://${BENTOV2_WEB_CONTAINER_NAME}:${BENTOV2_WEB_INTERNAL_PORT};
 
-            proxy_pass    $upstream_web;
+            proxy_pass $upstream_web;
             error_log /var/log/bentov2_web_errors.log;
-
         }
 
         # --- All API stuff -- /api/* ---
@@ -176,7 +175,6 @@ http {
         location = /api/node-info {
             limit_req zone=perip burst=30 nodelay;
             limit_req zone=perserver burst=90;
-            set_by_lua_block $original_uri { return ngx.var.uri }
             content_by_lua_file /gateway/src/node_info.lua;
         }
 
