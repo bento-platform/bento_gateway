@@ -26,23 +26,35 @@ stream {
     # Use the Docker embedded DNS server
     resolver 127.0.0.11 ipv6=off;
 
+    # server_name doesn't exist in stream blocks
+    # instead, use SSL preread to redirect either back to the gateway
+    map $ssl_preread_server_name $name {
+        ${BENTOV2_AUTH_DOMAIN}  auth_server;
+        default                 bento_gateway;
+    }
+
     upstream auth_server {
         server ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
     }
+    upstream bento_gateway {
+        server ${BENTOV2_GATEWAY_CONTAINER_NAME}:443;
+    }
+
     server {
         listen 443;
 
         server_name ${BENTOV2_AUTH_DOMAIN};
 
         # Security --
-        add_header X-Frame-Options "SAMEORIGIN";
-        add_header X-XSS-Protection "1; mode=block";
-        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        add_header  X-Frame-Options "SAMEORIGIN";
+        add_header  X-XSS-Protection "1; mode=block";
+        add_header  Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
         # --
 
-        error_log /var/log/bentov2_auth_errors.log
+        error_log   /var/log/bentov2_auth_errors.log
 
-        proxy_pass auth_server;
+        ssl_preread on;
+        proxy_pass  $name;
     }
 }
 # -- Internal IDP Ends Here --
