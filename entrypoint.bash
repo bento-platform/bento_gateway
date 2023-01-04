@@ -47,6 +47,8 @@ fi
 cp ./nginx.conf.pre /usr/local/openresty/nginx/conf/nginx.conf
 rm ./nginx.conf.pre*  # Remove pre-final file + any backups
 
+cat /usr/local/openresty/nginx/conf/nginx.conf
+
 # Process any service templates, using only the selected variables:
 echo "[bento_gateway] [entrypoint] writing service NGINX configuration"
 for f in $(ls /gateway/services/*.conf.tpl); do
