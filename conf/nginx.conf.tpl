@@ -1,4 +1,4 @@
-worker_processes 2;
+worker_processes 1;
 
 # expose env vars to lua code
 env CHORD_DEBUG;
@@ -49,7 +49,7 @@ stream {
 #         add_header  Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
         # --
 
-        error_log   /var/log/bentov2_auth_errors.log info;
+        error_log   /var/log/bentov2_auth_errors.log;
 
         ssl_preread on;
         proxy_pass  $name;
