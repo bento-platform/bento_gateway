@@ -61,12 +61,14 @@ http {
     # Use the Docker embedded DNS server
     resolver 127.0.0.11 ipv6=off;
 
+    # Set up log format
     log_format compression '$remote_addr - $remote_user [$time_local] '
                            '"$request" $status $body_bytes_sent '
                            '"$http_referer" "$http_user_agent" "$gzip_ratio" "$uri"';
 
+    # Set up per-server and per-address rate limiter
     limit_req_zone $binary_remote_addr zone=perip:10m rate=10r/s;
-    limit_req_zone $server_name zone=perserver:10m rate=30r/s;
+    limit_req_zone $server_name zone=perserver:10m rate=40r/s;
 
     # Redirect all http to https
     server {
@@ -158,10 +160,18 @@ http {
         set $chord_auth_config     "{auth_config}";
         set $chord_instance_config "{instance_config}";
 
+        # lua-resty-session configuration
+        #  - This is important! It configures exactly how we want our sessions to function,
+        #    and allows us to share session data across multiple workers.
+        set $session_storage        redis;
+        set $session_redis_prefix   oidc;
+        set $session_redis_host     bentov2-redis;  # TODO: configurable
+        set $session_secret         ${BENTOV2_SESSION_SECRET};
+
         # - Per lua-resty-session, the 'regenerate' strategy is more reliable for
         #   SPAs which make a lot of asynchronous requests, as it does not
         #   immediately replace the old records for sessions when making a new one.
-        set $session_strategy        regenerate;
+        set $session_strategy       regenerate;
 
 
         # Web
