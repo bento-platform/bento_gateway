@@ -23,6 +23,9 @@ events {
 # BentoV2 Auth - Pass through SSL connection
 # -
 stream {
+    # Use the Docker embedded DNS server
+    resolver 127.0.0.11 ipv6=off;
+
     upstream auth_server {
         server ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
     }
