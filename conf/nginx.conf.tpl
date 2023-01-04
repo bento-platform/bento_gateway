@@ -163,12 +163,13 @@ http {
         # lua-resty-session configuration
         #  - This is important! It configures exactly how we want our sessions to function,
         #    and allows us to share session data across multiple workers.
-        set $session_cipher          none;   # SECURITY: only use this with Redis; don't need to encrypt session ID
-        set $session_cookie_samesite Strict;
-        set $session_storage         redis;
-        set $session_redis_prefix    oidc;
-        set $session_redis_host      bentov2-redis;  # TODO: configurable
-        set $session_secret          ${BENTOV2_SESSION_SECRET};
+        set $session_cipher           none;   # SECURITY: only use this with Redis; don't need to encrypt session ID
+        set $session_cookie_samesite  Strict;
+        set $session_storage          redis;
+        set $session_redis_prefix     oidc;
+        set $session_redis_host       ${BENTOV2_REDIS_CONTAINER_NAME};
+        set $session_redis_uselocking no;
+        set $session_secret           ${BENTOV2_SESSION_SECRET};
 
         # - Per lua-resty-session, the 'regenerate' strategy is more reliable for
         #   SPAs which make a lot of asynchronous requests, as it does not
