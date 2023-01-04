@@ -19,6 +19,30 @@ error_log stderr info;
 events {
     worker_connections 1024;
 }
+# -- Internal IDP Starts Here --
+# BentoV2 Auth - Pass through SSL connection
+# -
+stream {
+    upstream auth_server {
+        server ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
+    }
+    server {
+        listen 443;
+
+        server_name ${BENTOV2_AUTH_DOMAIN};
+
+        # Security --
+        add_header X-Frame-Options "SAMEORIGIN";
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        # --
+
+        error_log /var/log/bentov2_auth_errors.log
+
+        proxy_pass auth_server;
+    }
+}
+# -- Internal IDP Ends Here --
 
 http {
     # Use the Docker embedded DNS server
@@ -46,32 +70,6 @@ http {
 
         return 301 https://$host$request_uri;
     }
-
-    # All https traffic
-    # -- Internal IDP Starts Here --
-    # BentoV2 Auth
-    # -
-    stream {
-        upstream auth_server {
-            server ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
-        }
-        server {
-            listen 443;
-
-            server_name ${BENTOV2_AUTH_DOMAIN};
-
-            # Security --
-            add_header X-Frame-Options "SAMEORIGIN";
-            add_header X-XSS-Protection "1; mode=block";
-            add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-            # --
-
-            error_log /var/log/bentov2_auth_errors.log
-
-            proxy_pass auth_server;
-        }
-    }
-    # -- Internal IDP Ends Here --
 
 
     # Bento Public
