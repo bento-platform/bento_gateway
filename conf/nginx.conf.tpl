@@ -43,8 +43,6 @@ stream {
     server {
         listen 443;
 
-        server_name ${BENTOV2_AUTH_DOMAIN};
-
         # Security --
         add_header  X-Frame-Options "SAMEORIGIN";
         add_header  X-XSS-Protection "1; mode=block";
