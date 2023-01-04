@@ -70,6 +70,15 @@ http {
     limit_req_zone $binary_remote_addr zone=perip:10m rate=10r/s;
     limit_req_zone $server_name zone=perserver:10m rate=40r/s;
 
+    # Explicitly prevent underscores in headers from being passed, even though
+    # off is the default. This prevents auth header forging.
+    # e.g. https://docs.djangoproject.com/en/3.0/howto/auth-remote-user/
+    underscores_in_headers off;
+
+    # Prevent proxy from trying multiple upstreams.
+    proxy_next_upstream off;
+
+
     # Redirect all http to https
     server {
         listen 80 default_server;
@@ -164,17 +173,19 @@ http {
         #  - This is important! It configures exactly how we want our sessions to function,
         #    and allows us to share session data across multiple workers.
         set $session_cipher           none;   # SECURITY: only use this with Redis; don't need to encrypt session ID
-        set $session_cookie_samesite  Strict;
+        set $session_cookie_samesite  None;  # Needs to be none(?), otherwise our session cookie gets weird
         set $session_storage          redis;
         set $session_redis_prefix     oidc;
         set $session_redis_host       ${BENTOV2_REDIS_CONTAINER_NAME};
-        set $session_redis_uselocking no;
         set $session_secret           ${BENTOV2_SESSION_SECRET};
 
         # - Per lua-resty-session, the 'regenerate' strategy is more reliable for
         #   SPAs which make a lot of asynchronous requests, as it does not
         #   immediately replace the old records for sessions when making a new one.
-        set $session_strategy       regenerate;
+        # - We don't need locking with regenerate session strat: https://github.com/bungle/lua-resty-session/issues/113
+        #   This can help performance if we forget to release a lock / close a session somewhere.
+        set $session_redis_uselocking  no;
+        set $session_strategy          regenerate;
 
 
         # Web
