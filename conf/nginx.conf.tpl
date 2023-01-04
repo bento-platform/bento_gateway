@@ -78,6 +78,12 @@ http {
     # Prevent proxy from trying multiple upstreams.
     proxy_next_upstream off;
 
+    # From http://nginx.org/en/docs/http/websocket.html
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
+    }
+
 
     # Redirect all http to https
     server {
