@@ -37,7 +37,7 @@ stream {
         server ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
     }
     upstream bento_gateway {
-        server ${BENTOV2_GATEWAY_CONTAINER_NAME}:443;
+        server ${BENTOV2_GATEWAY_CONTAINER_NAME}:444;
     }
 
     server {
@@ -89,7 +89,8 @@ http {
 
     # Bento Public
     server {
-        listen 443 ssl;
+        # Use 444 for internal SSL to allow streaming back to self (above)
+        listen 444 ssl;
 
         server_name ${BENTOV2_DOMAIN};
 
@@ -140,7 +141,8 @@ http {
 
     # Bento Portal
     server {
-        listen 443 ssl;
+        # Use 444 for internal SSL to allow streaming back to self (above)
+        listen 444 ssl;
 
         server_name ${BENTOV2_PORTAL_DOMAIN};
 
