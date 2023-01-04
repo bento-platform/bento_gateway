@@ -3,7 +3,8 @@ FROM openresty/openresty:1.21.4.1-0-alpine-fat
 # Install apt and lua dependencies
 RUN apk update && \
     apk add git bash && \
-    /usr/local/openresty/luajit/bin/luarocks install lua-resty-session lua-resty-openidc
+    /usr/local/openresty/luajit/bin/luarocks install lua-resty-session && \
+    /usr/local/openresty/luajit/bin/luarocks install lua-resty-openidc
 
 WORKDIR /gateway
 RUN mkdir -p /usr/local/openresty/nginx/conf/bento_services && \
