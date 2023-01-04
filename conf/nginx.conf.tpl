@@ -49,7 +49,7 @@ stream {
 #         add_header  Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
         # --
 
-        error_log   /var/log/bentov2_auth_errors.log
+        error_log   /var/log/bentov2_auth_errors.log info;
 
         ssl_preread on;
         proxy_pass  $name;
