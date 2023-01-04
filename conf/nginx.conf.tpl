@@ -76,9 +76,9 @@ http {
         server_name _; # Redirect http no matter the domain name
 
         # Security --
-        add_header X-Frame-Options "SAMEORIGIN";
-        add_header X-XSS-Protection "1; mode=block";
-        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+#         add_header X-Frame-Options "SAMEORIGIN";
+#         add_header X-XSS-Protection "1; mode=block";
+#         add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
         # --
 
         return 301 https://$host$request_uri;
