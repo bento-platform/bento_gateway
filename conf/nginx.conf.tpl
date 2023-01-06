@@ -141,7 +141,7 @@ http {
             rewrite /api/beacon/(.*) /$1  break;
 
             # Forward request to beacon
-            proxy_pass http://${BEACON_CONTAINER_NAME}:${BEACON_INTERNAL_PORT}/$1$is_args$args;
+            proxy_pass http://${BENTO_BEACON_CONTAINER_NAME}:${BENTO_BEACON_INTERNAL_PORT}/$1$is_args$args;
 
             # Errors
             error_log /var/log/bentov2_beacon_errors.log;
