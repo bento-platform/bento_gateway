@@ -212,15 +212,15 @@ http {
         # --- All API stuff -- /api/* ---
         # -- Public node-info
         location = /api/node-info {
-            limit_req zone=perip burst=30 nodelay;
-            limit_req zone=perserver burst=90;
+            limit_req zone=perip burst=10 nodelay;
+            limit_req zone=perserver burst=30;
             content_by_lua_file /gateway/src/node_info.lua;
         }
 
         # -- User Auth
         location ~ /api/auth {
-            limit_req zone=perip burst=30 nodelay;
-            limit_req zone=perserver burst=90;
+            limit_req zone=perip burst=10 nodelay;
+            limit_req zone=perserver burst=30;
             set_by_lua_block $original_uri { return ngx.var.uri }
             content_by_lua_file /gateway/src/proxy_auth.lua;
         }
