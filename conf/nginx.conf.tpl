@@ -29,16 +29,16 @@ stream {
     # server_name doesn't exist in stream blocks
     # instead, use SSL preread to redirect either back to the gateway
     map $ssl_preread_server_name $name {
-        ${BENTOV2_AUTH_DOMAIN}  auth_server;
-        default                 bento_gateway;
+        ${BENTOV2_AUTH_DOMAIN}  ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
+        default                 ${BENTOV2_GATEWAY_CONTAINER_NAME}:444;
     }
 
-    upstream auth_server {
-        server ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
-    }
-    upstream bento_gateway {
-        server ${BENTOV2_GATEWAY_CONTAINER_NAME}:444;
-    }
+#     upstream auth_server {
+#         server ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
+#     }
+#     upstream bento_gateway {
+#         server ${BENTOV2_GATEWAY_CONTAINER_NAME}:444;
+#     }
 
     server {
         listen 443;
