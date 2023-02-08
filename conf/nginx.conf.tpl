@@ -19,9 +19,10 @@ error_log stderr info;
 events {
     worker_connections 1024;
 }
-# -- Internal IDP Starts Here --
-# BentoV2 Auth - Pass through SSL connection
-# -
+
+# Pass through SSL connection to either Keycloak or the Bento gateway.
+# - Don't change the # -- ... -- lines, as they are used to find/replace chunks.
+# - Can't add security headers on stream blocks - rely on Keycloak's own security settings.
 stream {
     # Use the Docker embedded DNS server
     resolver 127.0.0.11 ipv6=off;
@@ -29,33 +30,19 @@ stream {
     # server_name doesn't exist in stream blocks
     # instead, use SSL preread to redirect either back to the gateway
     map $ssl_preread_server_name $name {
+        # -- Internal IDP Starts Here --
         ${BENTOV2_AUTH_DOMAIN}  ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
+        # -- Internal IDP Ends Here --
         default                 ${BENTOV2_GATEWAY_CONTAINER_NAME}:444;
     }
 
-#     upstream auth_server {
-#         server ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
-#     }
-#     upstream bento_gateway {
-#         server ${BENTOV2_GATEWAY_CONTAINER_NAME}:444;
-#     }
-
     server {
-        listen 443;
-
-        # Security --
-#         add_header  X-Frame-Options "SAMEORIGIN";
-#         add_header  X-XSS-Protection "1; mode=block";
-#         add_header  Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-        # --
-
+        listen      443;
         error_log   /var/log/bentov2_auth_errors.log;
-
         ssl_preread on;
         proxy_pass  $name;
     }
 }
-# -- Internal IDP Ends Here --
 
 http {
     # Use the Docker embedded DNS server
