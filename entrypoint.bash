@@ -2,6 +2,12 @@
 
 # WORKDIR: /gateway
 
+# Check required environment variables that may accidentally be unset (i.e., need to be set by hand)
+if [[ -z "${BENTOV2_SESSION_SECRET}" ]]; then
+  echo "[bento_gateway] [entrypoint] BENTOV2_SESSION_SECRET is not set. Exiting..." 1>&2
+  exit 1
+fi
+
 # Gather a list of all environment variables to use for the NGINX conf. template:
 touch ./VARIABLES
 echo "[bento_gateway] [entrypoint] gathering environment variables for configuration templates"
@@ -24,20 +30,20 @@ envsubst "$(cat ./VARIABLES)" \
 
 # Run fine-tuning on nginx.conf.pre
 if [[ ${BENTOV2_USE_EXTERNAL_IDP} == 1 ]]; then
-  echo "Fine-tuning nginx.conf to use an external IDP"
+  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use an external IDP"
   sed -i.bak \
     '/-- Internal IDP Starts Here --/,/-- Internal IDP Ends Here --/d' \
     ./nginx.conf.pre
 else
-  echo "Fine-tuning nginx.conf to use an internal IDP"
+  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use an internal IDP"
 fi
 if [[ ${BENTOV2_USE_BENTO_PUBLIC} == 1 ]]; then
-  echo "Fine-tuning nginx.conf to use bento_public"
+  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use bento_public"
   sed -i.bak \
     '/-- Do Not Use Bento-Public Starts Here --/,/-- Do Not Use Bento-Public Ends Here --/d' \
     ./nginx.conf.pre
 else
-  echo "Fine tuning nginx.conf to disable Bento-Public"
+  echo "[bento_gateway] [entrypoint] Fine tuning nginx.conf to disable Bento-Public"
   sed -i.bak \
     '/-- Use Bento-Public Starts Here --/,/-- Use Bento-Public Ends Here --/d' \
     ./nginx.conf.pre
