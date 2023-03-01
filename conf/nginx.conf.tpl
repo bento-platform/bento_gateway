@@ -233,6 +233,8 @@ http {
         server_name ${BENTOV2_CBIOPORTAL_DOMAIN};
 
         # TODO
+        # Frame embedding: allow private portal to embed cBioPortal as an iframe:
+        add_header Content-Security-Policy "frame-ancestors 'self' https://${BENTOV2_PORTAL_DOMAIN};";
 
         # CHORD constants (configuration file locations)
         set $chord_auth_config     "{auth_config}";
