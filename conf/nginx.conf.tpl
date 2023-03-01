@@ -232,7 +232,9 @@ http {
 
         server_name ${BENTOV2_CBIOPORTAL_DOMAIN};
 
-        # TODO
+        ssl_certificate ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_CBIOPORTAL_FULLCHAIN_RELATIVE_PATH};
+        ssl_certificate_key ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_CBIOPORTAL_PRIVKEY_RELATIVE_PATH};
+
         # Frame embedding: allow private portal to embed cBioPortal as an iframe:
         add_header Content-Security-Policy "frame-ancestors 'self' https://${BENTOV2_PORTAL_DOMAIN};";
 
