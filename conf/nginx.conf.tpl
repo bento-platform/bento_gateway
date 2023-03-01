@@ -14,6 +14,8 @@ env TOKEN_ENDPOINT_AUTH_METHOD;
 # TODO: move to secret instead of using env
 env CLIENT_SECRET;
 
+env CBIOPORTAL_URL;
+
 error_log stderr info;
 
 events {
