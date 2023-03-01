@@ -42,7 +42,7 @@ local opts_ssl_verify = "no"
 -- If in production, enforce CHORD_URL as the base for redirect
 local opts_redirect_uri = OIDC_CALLBACK_PATH
 if not CHORD_DEBUG then
-  opts_redirect_uri = os.getenv("CHORD_URL") .. OIDC_CALLBACK_PATH_NO_SLASH
+  opts_redirect_uri = os.getenv("CBIOPORTAL_URL") .. OIDC_CALLBACK_PATH_NO_SLASH
 end
 
 -- defines URL the client will be redirected to after the `/api/auth/sign-out` is
@@ -54,7 +54,7 @@ local opts = {
   logout_path = SIGN_OUT_PATH,
   redirect_after_logout_uri = opts_redirect_after_logout_uri,
   redirect_after_logout_with_id_token_hint = false,
-  post_logout_redirect_uri = os.getenv("CHORD_URL"),
+  post_logout_redirect_uri = os.getenv("CBIOPORTAL_URL"),
 
   discovery = os.getenv("OIDC_DISCOVERY_URI"),
 
@@ -106,7 +106,7 @@ if auth_header and auth_header:match("^Bearer .+") then
 else
   -- If no Bearer token is set, use session cookie to get authentication information
   local res, err, _, session = openidc.authenticate(
-          opts, ngx.var.request_uri, "deny")
+          opts, ngx.var.request_uri, nil)  -- Nil means redirect to sign-in page
   if res == nil or err then  -- Authentication wasn't successful
     -- Authentication wasn't successful; clear the session
     if session ~= nil then
