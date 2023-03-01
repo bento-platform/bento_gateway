@@ -823,4 +823,3 @@ ngx.req.set_header("X-Authorization", nested_auth_header)
 -- If an unrecoverable error occurred, it will jump here to skip everything and
 -- avoid trying to execute code while in an invalid state.
 ::script_end::
-
