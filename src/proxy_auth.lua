@@ -88,10 +88,11 @@ local ONE_TIME_TOKENS_INVALIDATE_ALL_PATH = "/api/auth/ott/invalidate_all"
 local TEMP_TOKENS_GENERATE_PATH = "/api/auth/tt/generate"
 
 
-local REDIS_CONNECTION_STRING = os.getenv("REDIS_CONNECTION_STRING")
-if REDIS_CONNECTION_STRING == nil or REDIS_CONNECTION_STRING == "" then
+local REDIS_CONNECTION_STRING = "bentov2-redis:6379"
+local REDIS_CONTAINER_NAME = os.getenv("BENTOV2_REDIS_CONTAINER_NAME")
+if REDIS_CONTAINER_NAME ~= nil and REDIS_CONTAINER_NAME ~= "" then
   -- Default / backwards-compatibility before this was configurable:
-  REDIS_CONNECTION_STRING = "bentov2-redis:6379"
+  REDIS_CONNECTION_STRING = REDIS_CONTAINER_NAME  -- No port specified, will use default port
 end
 
 local REDIS_SOCKET
