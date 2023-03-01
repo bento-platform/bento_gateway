@@ -33,6 +33,9 @@ stream {
         # -- Internal IDP Starts Here --
         ${BENTOV2_AUTH_DOMAIN}  ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
         # -- Internal IDP Ends Here --
+        # -- cBioPortal Starts Here --
+        ${BENTOV2_CBIOPORTAL_DOMAIN}  ${BENTOV2_CBIOPORTAL_CONTAINER_NAME}:${BENTOV2_CBIOPORTAL_INTERNAL_PORT};
+        # -- cBioPortal Ends Here --
         default                 ${BENTOV2_GATEWAY_CONTAINER_NAME}:444;
     }
 
@@ -111,8 +114,9 @@ http {
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
 
-            set $upstream_public http://${BENTO_PUBLIC_CONTAINER_NAME}:${BENTO_PUBLIC_INTERNAL_PORT};
-            proxy_pass    $upstream_public;
+            # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
+            set         $upstream_public http://${BENTO_PUBLIC_CONTAINER_NAME}:${BENTO_PUBLIC_INTERNAL_PORT};
+            proxy_pass  $upstream_public;
 
             error_log /var/log/bentov2_public_errors.log;
         }
@@ -190,6 +194,7 @@ http {
             set $request_url $request_uri;
             set $url $uri;
 
+            # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
             set $upstream_web http://${BENTOV2_WEB_CONTAINER_NAME}:${BENTOV2_WEB_INTERNAL_PORT};
 
             proxy_pass $upstream_web;
@@ -215,5 +220,54 @@ http {
         # Include all service location blocks (mounted into the container)
         # Don't include template files (.conf.tpl), just processed .conf files
         include bento_services/*.conf;
+    }
+
+
+    # cBioPortal
+    server {
+        # Use 444 for internal SSL to allow streaming back to self (above)
+        listen 444 ssl;
+
+        server_name ${BENTOV2_CBIOPORTAL_DOMAIN};
+
+        # TODO
+
+        # CHORD constants (configuration file locations)
+        set $chord_auth_config     "{auth_config}";
+        set $chord_instance_config "{instance_config}";
+
+        # lua-resty-session configuration
+        #  - This is important! It configures exactly how we want our sessions to function,
+        #    and allows us to share session data across multiple workers.
+        set $session_cipher           none;   # SECURITY: only use this with Redis; don't need to encrypt session ID
+        set $session_cookie_samesite  None;  # Needs to be none(?), otherwise our session cookie gets weird
+        set $session_storage          redis;
+        set $session_redis_prefix     oidc;
+        set $session_redis_host       ${BENTOV2_REDIS_CONTAINER_NAME};
+        set $session_secret           ${BENTOV2_SESSION_SECRET};
+
+        # - Per lua-resty-session, the 'regenerate' strategy is more reliable for
+        #   SPAs which make a lot of asynchronous requests, as it does not
+        #   immediately replace the old records for sessions when making a new one.
+        # - We don't need locking with regenerate session strat: https://github.com/bungle/lua-resty-session/issues/113
+        #   This can help performance if we forget to release a lock / close a session somewhere.
+        set $session_redis_uselocking  no;
+        set $session_strategy          regenerate;
+
+        # Proxy pass to cBioPortal container
+        location / {
+            # Reverse proxy settings
+            include /gateway/conf/proxy.conf;
+            include /gateway/conf/proxy_cbioportal.conf;
+
+            set $request_url $request_uri;
+            set $url $uri;
+
+            # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
+            set $upstream_cbio http://${BENTOV2_CBIOPORTAL_CONTAINER_NAME}:${BENTOV2_CBIOPORTAL_INTERNAL_PORT};
+
+            proxy_pass $upstream_cbio;
+            error_log /var/log/bentov2_cbio_errors.log;
+        }
     }
 }
