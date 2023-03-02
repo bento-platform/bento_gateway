@@ -45,7 +45,7 @@ if [[ "$(true_values_to_1 $BENTOV2_USE_EXTERNAL_IDP)" == 1 ]]; then
 else
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use an internal IDP"
 fi
-if [[ "$(true_values_to_1 $BENTOV2_USE_EXTERNAL_IDP)" == 1 ]]; then
+if [[ "$(true_values_to_1 $BENTOV2_USE_BENTO_PUBLIC)" == 1 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use bento_public"
   sed -i.bak \
     '/-- Do Not Use Bento-Public Starts Here --/,/-- Do Not Use Bento-Public Ends Here --/d' \
