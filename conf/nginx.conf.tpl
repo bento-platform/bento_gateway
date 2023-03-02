@@ -30,14 +30,12 @@ stream {
     resolver 127.0.0.11 ipv6=off;
 
     # server_name doesn't exist in stream blocks
-    # instead, use SSL preread to redirect either back to the gateway
+    # instead, use SSL preread to redirect either back to the gateway or to the auth container,
+    # since we want to terminate SSL at Keycloak, not at the gateway.
     map $ssl_preread_server_name $name {
         # -- Internal IDP Starts Here --
         ${BENTOV2_AUTH_DOMAIN}  ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
         # -- Internal IDP Ends Here --
-        # -- cBioPortal Starts Here --
-        ${BENTOV2_CBIOPORTAL_DOMAIN}  ${BENTOV2_CBIOPORTAL_CONTAINER_NAME}:${BENTOV2_CBIOPORTAL_INTERNAL_PORT};
-        # -- cBioPortal Ends Here --
         default                 ${BENTOV2_GATEWAY_CONTAINER_NAME}:444;
     }
 

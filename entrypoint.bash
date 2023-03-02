@@ -56,14 +56,14 @@ else
     '/-- Use Bento-Public Starts Here --/,/-- Use Bento-Public Ends Here --/d' \
     ./nginx.conf.pre
 fi
-if [[ "$(true_values_to_1 $BENTO_CBIOPORTAL_ENABLE)" == 1 ]]; then
-  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use cBioPortal"
-else
-  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to disable cBioPortal"
-  sed -i.bak \
-      '/-- cBioPortal Starts Here --/,/-- cBioPortal Ends Here --/d' \
-      ./nginx.conf.pre
-fi
+#if [[ "$(true_values_to_1 $BENTO_CBIOPORTAL_ENABLE)" == 1 ]]; then
+#  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use cBioPortal"
+#else
+#  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to disable cBioPortal"
+#  sed -i.bak \
+#      '/-- cBioPortal Starts Here --/,/-- cBioPortal Ends Here --/d' \
+#      ./nginx.conf.pre
+#fi
 
 # Move nginx.conf into position
 cp ./nginx.conf.pre /usr/local/openresty/nginx/conf/nginx.conf
