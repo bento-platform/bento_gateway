@@ -92,6 +92,13 @@ http {
     }
 
 
+    # No unspecified domain funnies allowed!
+    server {
+        listen 444 ssl;
+        ssl_reject_handshake on;
+    }
+
+
     # Bento Public
     server {
         # Use 444 for internal SSL to allow streaming back to self (above)
@@ -273,12 +280,5 @@ http {
             proxy_pass $upstream_cbio;
             error_log /var/log/bentov2_cbio_errors.log;
         }
-    }
-
-    # No default server allowed!
-    server {
-        listen 444 ssl;
-        server_name _;
-        ssl_reject_handshake on;
     }
 }
