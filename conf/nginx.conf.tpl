@@ -274,4 +274,11 @@ http {
             error_log /var/log/bentov2_cbio_errors.log;
         }
     }
+
+    # No default server allowed!
+    server {
+        listen 444 ssl;
+        server_name _;
+        ssl_reject_handshake on;
+    }
 }
