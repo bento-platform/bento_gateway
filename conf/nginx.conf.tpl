@@ -33,9 +33,9 @@ stream {
     # instead, use SSL preread to redirect either back to the gateway or to the auth container,
     # since we want to terminate SSL at Keycloak, not at the gateway.
     map $ssl_preread_server_name $name {
-        # -- Internal IDP Starts Here --
+        # tpl__internal_idp__start
         ${BENTOV2_AUTH_DOMAIN}  ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
-        # -- Internal IDP Ends Here --
+        # tpl__internal_idp__end
         default                 ${BENTOV2_GATEWAY_CONTAINER_NAME}:444;
     }
 
@@ -115,7 +115,7 @@ http {
         add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
         # --
 
-        # -- Use Bento-Public Starts Here --
+        # tpl__use_bento_public__start
         # Public Web
         location / {
             # Reverse proxy settings
@@ -145,10 +145,10 @@ http {
             error_log /var/log/bentov2_beacon_errors.log;
         }
 
-        # -- Use Bento-Public Ends Here --
-        # -- Do Not Use Bento-Public Starts Here --
+        # tpl__use_bento_public__end
+        # tpl__do_not_use_bento_public__start
         return 301 https://portal.$host$request_uri;
-        # -- Do Not Use Bento-Public Ends Here --
+        # tpl__do_not_use_bento_public__end
     }
 
 

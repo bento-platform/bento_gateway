@@ -40,7 +40,7 @@ envsubst "$(cat ./VARIABLES)" \
 if [[ "$(true_values_to_1 $BENTOV2_USE_EXTERNAL_IDP)" == 1 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use an external IDP"
   sed -i.bak \
-    '/-- Internal IDP Starts Here --/,/-- Internal IDP Ends Here --/d' \
+    '/tpl__internal_idp__start/,/tpl__internal_idp__end/d' \
     ./nginx.conf.pre
 else
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use an internal IDP"
@@ -48,12 +48,12 @@ fi
 if [[ "$(true_values_to_1 $BENTOV2_USE_BENTO_PUBLIC)" == 1 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use bento_public"
   sed -i.bak \
-    '/-- Do Not Use Bento-Public Starts Here --/,/-- Do Not Use Bento-Public Ends Here --/d' \
+    '/tpl__do_not_use_bento_public__start/,/tpl__do_not_use_bento_public__end/d' \
     ./nginx.conf.pre
 else
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to disable bento_public"
   sed -i.bak \
-    '/-- Use Bento-Public Starts Here --/,/-- Use Bento-Public Ends Here --/d' \
+    '/tpl__use_bento_public__start/,/tpl__use_bento_public__end/d' \
     ./nginx.conf.pre
 fi
 #if [[ "$(true_values_to_1 $BENTO_CBIOPORTAL_ENABLE)" == 1 ]]; then
