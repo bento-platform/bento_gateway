@@ -56,7 +56,7 @@ else
     '/tpl__use_bento_public__start/,/tpl__use_bento_public__end/d' \
     ./nginx.conf.pre
 fi
-if [[ "$(true_values_to_1 $BENTO_CBIOPORTAL_ENABLE)" == 1 ]]; then
+if [[ "$(true_values_to_1 $BENTO_CBIOPORTAL_ENABLED)" == 1 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use cBioPortal"
 else
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to disable cBioPortal"
