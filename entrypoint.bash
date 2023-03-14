@@ -2,6 +2,9 @@
 
 # WORKDIR: /gateway
 
+# Utility function - historically there's been some inconsistency in what value we use for "true"
+# for feature flags / some other environment variables.
+# This function ensures that all of those values get cast to '1', so only one value needs to be checked.
 function true_values_to_1 () {
   if [[ "$1" == 1 || "$1" == "true" || "$1" == "True" || "$1" == "yes" ]]; then
     echo "1"
