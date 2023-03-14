@@ -230,6 +230,7 @@ http {
     }
 
 
+    # tpl__use_cbioportal__start
     # cBioPortal
     server {
         # Use 444 for internal SSL to allow streaming back to self (above)
@@ -281,4 +282,5 @@ http {
             error_log /var/log/bentov2_cbio_errors.log;
         }
     }
+    # tpl__use_cbioportal__end
 }
