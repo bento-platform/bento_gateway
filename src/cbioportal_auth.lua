@@ -5,7 +5,7 @@ local cjson = require("cjson")
 local openidc = require("resty.openidc")
 
 -- Helpers
-stringtoboolean={ ["true"]=true, ["false"]=false }
+local stringtoboolean={ ["true"]=true, ["false"]=false }
 
 local uncached_response = function (status, mime, message)
   -- Helper method to return uncached responses directly from the proxy without

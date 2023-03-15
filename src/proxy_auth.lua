@@ -8,7 +8,7 @@ local redis = require("resty.redis")
 local str = require("resty.string")
 
 -- Helpers
-stringtoboolean={ ["true"]=true, ["false"]=false }
+local stringtoboolean={ ["true"]=true, ["false"]=false }
 --
 
 -- -- TEMP
