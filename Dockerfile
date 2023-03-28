@@ -1,4 +1,4 @@
-FROM openresty/openresty:1.21.4.1-0-alpine-fat
+FROM openresty/openresty:1.21.4.1-6-alpine-fat
 
 # Install apt and lua dependencies
 RUN apk update && \
