@@ -145,7 +145,7 @@ end
 local get_user_role = function (user_id)
   -- user_role = "user"
   -- TEMP:
-  user_role= "owner"
+  local user_role = "owner"
   -- 
 
   -- for _, owner_id in ipairs(auth__owner_ids) do
