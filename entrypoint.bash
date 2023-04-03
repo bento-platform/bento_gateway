@@ -87,7 +87,7 @@ echo "[bento_gateway] [entrypoint] writing service NGINX configuration"
 for f in $(ls /gateway/services/*.conf.tpl); do
   filename=$(basename -- "$f")
   outfile="${filename%%.*}.conf"
-  if [[ "$(python /gateway/src/service_conf_check.py < $outfile)" == "true" ]]; then
+  if [[ "$(python /gateway/src/service_conf_check.py < $outfile | tr -d '\n')" == "true" ]]; then
     echo "[bento_gateway] [entrypoint]    writing ${outfile}"
       envsubst "$(cat ./VARIABLES)" \
         < "${f}" \
