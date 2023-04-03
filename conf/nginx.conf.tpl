@@ -127,7 +127,9 @@ http {
 
             error_log /var/log/bentov2_public_errors.log;
         }
+        # tpl__use_bento_public__end
 
+        # tpl__use_bento_beacon__start
         # -- Beacon
         #  - Beacon is in the "Bento Public" namespace, since it yields public data.
         location ~ /api/beacon {
@@ -144,8 +146,8 @@ http {
             # Errors
             error_log /var/log/bentov2_beacon_errors.log;
         }
+        # tpl__use_bento_beacon__end
 
-        # tpl__use_bento_public__end
         # tpl__do_not_use_bento_public__start
         return 301 https://portal.$host$request_uri;
         # tpl__do_not_use_bento_public__end
