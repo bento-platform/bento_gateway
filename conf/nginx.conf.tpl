@@ -211,6 +211,12 @@ http {
         }
 
         # --- All API stuff -- /api/* ---
+
+        # -- Fallback 404 to avoid returning web HTML when an API request is made
+        location /api/ {
+            return 404;
+        }
+
         # -- Public node-info
         location = /api/node-info {
             limit_req zone=perip burst=10 nodelay;
