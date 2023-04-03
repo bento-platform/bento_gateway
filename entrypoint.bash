@@ -87,7 +87,7 @@ echo "[bento_gateway] [entrypoint] writing service NGINX configuration"
 for f in $(ls /gateway/services/*.conf.tpl); do
   filename=$(basename -- "$f")
   outfile="${filename%%.*}.conf"
-  enable_check="$(python /gateway/src/service_conf_check.py < $filename | tr -d '\n')"
+  enable_check="$(python /gateway/src/service_conf_check.py < $f | tr -d '\n')"
   echo "[bento_gateway] [entrypoint]    ${filename}: enable_check=${enable_check}"
   if [[ "${enable_check}" == "true" ]]; then
     echo "[bento_gateway] [entrypoint]    writing ${outfile}"
