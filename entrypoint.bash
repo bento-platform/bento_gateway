@@ -87,13 +87,15 @@ echo "[bento_gateway] [entrypoint] writing service NGINX configuration"
 for f in $(ls /gateway/services/*.conf.tpl); do
   filename=$(basename -- "$f")
   outfile="${filename%%.*}.conf"
-  if [[ "$(python /gateway/src/service_conf_check.py < $outfile | tr -d '\n')" == "true" ]]; then
+  enable_check="$(python /gateway/src/service_conf_check.py < $filename | tr -d '\n')"
+  echo "[bento_gateway] [entrypoint]    ${filename}: enable_check=${enable_check}"
+  if [[ "${enable_check}" == "true" ]]; then
     echo "[bento_gateway] [entrypoint]    writing ${outfile}"
       envsubst "$(cat ./VARIABLES)" \
         < "${f}" \
         > "/usr/local/openresty/nginx/conf/bento_services/${outfile}"
   else
-    echo "[bento_gateway] [entrypoint]    not enabling "${outfile}
+    echo "[bento_gateway] [entrypoint]    not enabling ${filename}"
   fi
 done
 
