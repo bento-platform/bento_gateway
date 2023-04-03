@@ -91,9 +91,9 @@ for f in $(ls /gateway/services/*.conf.tpl); do
   echo "[bento_gateway] [entrypoint]    ${filename}: enable_check=${enable_check}"
   if [[ "${enable_check}" == "true" ]]; then
     echo "[bento_gateway] [entrypoint]    writing ${outfile}"
-      envsubst "$(cat ./VARIABLES)" \
-        < "${f}" \
-        > "/usr/local/openresty/nginx/conf/bento_services/${outfile}"
+    envsubst "$(cat ./VARIABLES)" \
+      < "${f}" \
+      > "/usr/local/openresty/nginx/conf/bento_services/${outfile}"
   else
     echo "[bento_gateway] [entrypoint]    not enabling ${filename}"
   fi
