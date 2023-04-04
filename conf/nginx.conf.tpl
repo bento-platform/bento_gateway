@@ -60,6 +60,9 @@ http {
     limit_req_zone $binary_remote_addr zone=perip:10m rate=10r/s;
     limit_req_zone $server_name zone=perserver:10m rate=40r/s;
 
+    # Beacon-specific rate limiting zone; much more aggressive
+    limit_req_zone $binary_remote_addr zone=beacon_perip:10m rate=1r/s;
+
     # Explicitly prevent underscores in headers from being passed, even though
     # off is the default. This prevents auth header forging.
     # e.g. https://docs.djangoproject.com/en/3.0/howto/auth-remote-user/
@@ -132,6 +135,7 @@ http {
         #  - Beacon is in the "Bento Public" namespace, since it yields public data.
         location ~ /api/beacon {
             # Reverse proxy settings
+            include /gateway/conf/rate_limit_beacon.conf;  # More aggressive than the proxy.conf ones
             include /gateway/conf/proxy.conf;
             include /gateway/conf/proxy_extra.conf;
 
