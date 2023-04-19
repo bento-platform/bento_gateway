@@ -142,8 +142,7 @@ http {
             include /gateway/conf/proxy_extra.conf;
 
             # Forward request to beacon
-            set $service ${BENTO_BEACON_CONTAINER_NAME}:${BENTO_BEACON_INTERNAL_PORT};
-            proxy_pass   http://$service/;
+            proxy_pass   http://${BENTO_BEACON_CONTAINER_NAME}:${BENTO_BEACON_INTERNAL_PORT}/;
 
             # Errors
             error_log /var/log/bentov2_beacon_errors.log;
