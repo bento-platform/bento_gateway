@@ -29,6 +29,9 @@ stream {
     # Use the Docker embedded DNS server
     resolver 127.0.0.11 ipv6=off;
 
+    # Allow SNI-based proxying
+    proxy_ssl_server_name on;
+
     # server_name doesn't exist in stream blocks
     # instead, use SSL preread to redirect either back to the gateway or to the auth container,
     # since we want to terminate SSL at Keycloak, not at the gateway.
