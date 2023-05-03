@@ -13,6 +13,25 @@ function true_values_to_1 () {
   fi
 }
 
+# Utility function - process service templates into finalized NGINX configs
+function service_templates_to_confs () {
+  # $1 = "services" or "public_services"
+  for f in $(ls /gateway/$1/*.conf.tpl); do
+    filename=$(basename -- "$f")
+    outfile="${filename%%.*}.conf"
+    enable_check="$(python /gateway/src/service_conf_check.py < $f | tr -d '\n')"
+    echo "[bento_gateway] [entrypoint]    ${filename}: enable_check=${enable_check}"
+    if [[ "${enable_check}" == "true" ]]; then
+      echo "[bento_gateway] [entrypoint]    writing ${outfile}"
+      envsubst "$(cat ./VARIABLES)" \
+        < "${f}" \
+        > "/usr/local/openresty/nginx/conf/bento_${1}/${outfile}"
+    else
+      echo "[bento_gateway] [entrypoint]    not enabling ${filename}"
+    fi
+  done
+}
+
 # Check required environment variables that may accidentally be unset (i.e., need to be set by hand)
 if [[ -z "${BENTOV2_SESSION_SECRET}" ]]; then
   echo "[bento_gateway] [entrypoint] BENTOV2_SESSION_SECRET is not set. Exiting..." 1>&2
@@ -82,22 +101,13 @@ rm ./nginx.conf.pre*  # Remove pre-final file + any backups
 
 cat /usr/local/openresty/nginx/conf/nginx.conf
 
-# Process any service templates, using only the selected variables:
-echo "[bento_gateway] [entrypoint] writing service NGINX configuration"
-for f in $(ls /gateway/services/*.conf.tpl); do
-  filename=$(basename -- "$f")
-  outfile="${filename%%.*}.conf"
-  enable_check="$(python /gateway/src/service_conf_check.py < $f | tr -d '\n')"
-  echo "[bento_gateway] [entrypoint]    ${filename}: enable_check=${enable_check}"
-  if [[ "${enable_check}" == "true" ]]; then
-    echo "[bento_gateway] [entrypoint]    writing ${outfile}"
-    envsubst "$(cat ./VARIABLES)" \
-      < "${f}" \
-      > "/usr/local/openresty/nginx/conf/bento_services/${outfile}"
-  else
-    echo "[bento_gateway] [entrypoint]    not enabling ${filename}"
-  fi
-done
+# Process any public service templates, using only the selected variables:
+echo "[bento_gateway] [entrypoint] writing public service NGINX configuration"
+service_templates_to_confs "public_services"
+
+# Process any private service templates, using only the selected variables:
+echo "[bento_gateway] [entrypoint] writing private service NGINX configuration"
+service_templates_to_confs "services"
 
 # Start OpenResty
 echo "[bento_gateway] [entrypoint] starting OpenResty"

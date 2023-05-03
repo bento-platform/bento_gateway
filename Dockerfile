@@ -8,7 +8,9 @@ RUN apk update && \
 
 WORKDIR /gateway
 RUN mkdir -p /usr/local/openresty/nginx/conf/bento_services && \
-    mkdir -p /gateway/services
+    mkdir -p /usr/local/openresty/nginx/conf/bento_public_services && \
+    mkdir -p /gateway/services && \
+    mkdir -p /gateway/public_services
 COPY LICENSE LICENSE
 COPY conf conf
 COPY src src

@@ -132,6 +132,9 @@ http {
         }
         # tpl__use_bento_public__end
 
+        # Include all public service location blocks (mounted into the container)
+        include bento_public_services/*.conf;
+
         # tpl__use_bento_beacon__start
         # -- Beacon
         #  - Beacon is in the "Bento Public" namespace, since it yields public data.
@@ -238,7 +241,6 @@ http {
         }
 
         # Include all service location blocks (mounted into the container)
-        # Don't include template files (.conf.tpl), just processed .conf files
         include bento_services/*.conf;
     }
 
