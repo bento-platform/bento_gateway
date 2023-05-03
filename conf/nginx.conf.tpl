@@ -135,27 +135,6 @@ http {
         # Include all public service location blocks (mounted into the container)
         include bento_public_services/*.conf;
 
-        # tpl__use_bento_beacon__start
-        # -- Beacon
-        #  - Beacon is in the "Bento Public" namespace, since it yields public data.
-        location /api/beacon { return 302 https://${BENTOV2_PORTAL_DOMAIN}/api/beacon/; }
-        location /api/beacon/ {
-            # Reverse proxy settings
-            include /gateway/conf/rate_limit_beacon.conf;  # More aggressive than the proxy.conf ones
-            include /gateway/conf/proxy.conf;
-            include /gateway/conf/proxy_extra.conf;
-
-            # Forward request to Beacon
-            rewrite ^ $request_uri;
-            rewrite ^/api/beacon/(.*) /$1 break;
-            return 400;
-            proxy_pass http://${BENTO_BEACON_CONTAINER_NAME}:${BENTO_BEACON_INTERNAL_PORT}$uri;
-
-            # Errors
-            error_log /var/log/bentov2_beacon_errors.log;
-        }
-        # tpl__use_bento_beacon__end
-
         # tpl__do_not_use_bento_public__start
         return 301 https://portal.$host$request_uri;
         # tpl__do_not_use_bento_public__end
