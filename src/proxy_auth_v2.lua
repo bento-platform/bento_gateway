@@ -170,6 +170,10 @@ if auth_header and auth_header:match("^Bearer .+") then
   end
 
   -- If the script gets here, no error occurred and we can pass the request through
+  ngx.req.set_header("X-User", body["sub"])
+  -- Hard-coded since that is what was in proxy_auth v1 as well for Dockerized version of Bento:
+  ngx.req.set_header("X-User-Role", "admin")
+  ngx.req.set_header("X-Authorization", auth_header)
 else
   err_forbidden("missing bearer token")
   goto script_end
