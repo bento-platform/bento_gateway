@@ -18,18 +18,19 @@ local uncached_response = function (status, mime, message)
   ngx.exit(status)
 end
 
-local err_missing_bearer = function ()
+local err_forbidden = function (detail)
   uncached_response(
     ngx.HTTP_FORBIDDEN,
     "application/json",
-    cjson.encode({message="Forbidden", tag="missing bearer token"})
+    cjson.encode({message="Forbidden", detail=detail})
   )
 end
 
-local err_redis = function(tag)
+local err_500_and_log = function (detail, err)
+  ngx.log(ngx.ERR, detail, err)
   uncached_response(ngx.HTTP_INTERNAL_SERVER_ERROR,
     "application/json",
-    cjson.encode({message=red_err, tag=tag}))
+    cjson.encode({message="Internal server error", detail=detail}))
 end
 -- END FUNCTION DEFINITIONS -----–-----–-----–-----–-----–-----–-----–-----–-----–-------
 
@@ -83,7 +84,40 @@ end
 
 -- BEGIN AUTHORIZATION LOGIC ------------------------------------------------------------
 
--- TODO: check redis cache for OIDC configuration data; otherwise, fetch it.
+local c = http.new()
+local res
+local err
+
+-- Check redis cache for OpenID configuration data; otherwise, fetch it.
+
+local oidc_config
+res, red_err = red:get("bento_gateway:openid-config")
+if red_err then
+  err_500_and_log("error fetching openid-config from redis", red_err)
+  goto script_end
+end
+if res == ngx.null then
+  local OPENID_CONFIG_URL = os.getenv("BENTO_OPENID_CONFIG_URL")
+  res, err = c:request_uri(OPENID_CONFIG_URL, {method="GET"})
+  if err then
+    err_500_and_log("error in .../openid-configuration call", err)
+    goto script_end
+  end
+  local body
+  body, err = res:read_body()
+  if err then
+    err_500_and_log("error reading .../openid-configuration response", err)
+    goto script_end
+  end
+  oidc_config = cjson.decode(body)
+  red_ok, red_err = red:set("bento_gateway:openid-config", body)
+  if red_err then
+    err_500_and_log("error caching openid-config to redis", red_err)
+    goto script_end
+  end
+else
+  oidc_config = cjson.decode(res)
+end
 
 -- Check bearer token if set
 -- Adapted from https://github.com/zmartzone/lua-resty-openidc/issues/266#issuecomment-542771402
@@ -91,15 +125,14 @@ local auth_header = ngx.req.get_headers()["Authorization"]
 if auth_header and auth_header:match("^Bearer .+") then
   red_ok, red_err = redis_connect()
   if red_err then  -- Error occurred while connecting to Redis
-    err_redis("redis conn")
+    err_500_and_log("error connecting to redis", red_err)
     goto script_end
   end
 
   -- A Bearer auth header is set, check it is valid using the introspection endpoint
   -- IMPORTANT NOTE: Technically we (as application developers) SHOULD NOT have access to this endpoint.
   --  We are just using it as a way to transition to checking JWTs ourselves in each service.
-  local c = http.new()
-  local res, err = c:request_uri("TODO", {  -- TODO
+  res, err = c:request_uri(oidc_config["introspection_endpoint"], {
     method="POST",
     body="token=" .. auth_header:sub(auth_header:find(" ") + 1),
     headers={
@@ -107,7 +140,41 @@ if auth_header and auth_header:match("^Bearer .+") then
     },
   })
 
-  -- TODO: handle token response
+  if err then
+    err_500_and_log("error in introspection call", err)
+    goto script_end
+  end
+
+  local body
+  body, err = cjson.decode(body)
+  if err then
+    err_500_and_log("error reading introspection endpoint response", err)
+    goto script_end
+  end
+
+  if body["error"] ~= nil then
+    ngx.log(ngx.ERR, "error from introspection endpoint", body["error"], body["error_description"])
+    err_forbidden("invalid token")  -- generic error - don't reveal too much
+    goto script_end
+  end
+
+  if not body["active"] then
+    err_forbidden("inactive token - DNE or expired or bad client")
+    goto script_end
+  end
+
+  local client_id = os.getenv("CLIENT_ID")
+  if body["client_id"] ~= client_id then
+    err_forbidden("token has wrong client ID")
+    goto script_end
+  end
+
+  -- If the script gets here, no error occurred and we can pass the request through
 else
-  err_missing_bearer()
+  err_forbidden("missing bearer token")
+  goto script_end
 end
+
+-- If an unrecoverable error occurred, it will jump here to skip everything and
+-- avoid trying to execute code while in an invalid state.
+::script_end::
