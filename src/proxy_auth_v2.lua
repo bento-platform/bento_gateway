@@ -27,7 +27,7 @@ local err_forbidden = function (detail)
 end
 
 local err_500_and_log = function (detail, err)
-  ngx.log(ngx.ERR, detail, err)
+  ngx.log(ngx.ERR, detail, " err: ", err)
   uncached_response(ngx.HTTP_INTERNAL_SERVER_ERROR,
     "application/json",
     cjson.encode({message="Internal server error", detail=detail}))
@@ -89,6 +89,12 @@ local res
 local err
 
 -- Check redis cache for OpenID configuration data; otherwise, fetch it.
+
+red_ok, red_err = redis_connect()
+if red_err then
+  err_500_and_log("error opening redis connection", red_err)
+  goto script_end
+end
 
 local oidc_config
 res, red_err = red:get("bento_gateway:openid-config")
