@@ -193,7 +193,7 @@ http {
         location / {
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
-            include /gateway/conf/proxy_private.conf;
+            # include /gateway/conf/proxy_private.conf;
 
             set $request_url $request_uri;
             set $url $uri;
