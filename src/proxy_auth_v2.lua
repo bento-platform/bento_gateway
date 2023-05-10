@@ -157,32 +157,33 @@ if auth_header and auth_header:match("^Bearer .+") then
     goto script_end
   end
 
-  local body
-  body, err = cjson.decode(body)
+  local introspect_result
+  introspect_result, err = cjson.decode(res.body)
   if err then
     err_500_and_log("error reading introspection endpoint response", err)
     goto script_end
   end
 
-  if body["error"] ~= nil then
-    ngx.log(ngx.ERR, "error from introspection endpoint", body["error"], body["error_description"])
+  local introspect_err = introspect_result["error"]
+  if introspect_err ~= nil then
+    ngx.log(ngx.ERR, "error from introspection endpoint", introspect_err, introspect_result["error_description"])
     err_forbidden("invalid token")  -- generic error - don't reveal too much
     goto script_end
   end
 
-  if not body["active"] then
+  if not introspect_result["active"] then
     err_forbidden("inactive token - DNE or expired or bad client")
     goto script_end
   end
 
   local client_id = os.getenv("CLIENT_ID")
-  if body["client_id"] ~= client_id then
+  if introspect_result["client_id"] ~= client_id then
     err_forbidden("token has wrong client ID")
     goto script_end
   end
 
   -- If the script gets here, no error occurred and we can pass the request through
-  ngx.req.set_header("X-User", body["sub"])
+  ngx.req.set_header("X-User", introspect_result["sub"])
   -- Hard-coded since that is what was in proxy_auth v1 as well for Dockerized version of Bento:
   ngx.req.set_header("X-User-Role", "admin")
   ngx.req.set_header("X-Authorization", auth_header)
