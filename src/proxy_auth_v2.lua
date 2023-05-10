@@ -118,18 +118,13 @@ if res == ngx.null then
     err_500_and_log("error in .../openid-configuration call", err)
     goto script_end
   end
-  local body
-  body, err = res:read_body()
-  if err then
-    err_500_and_log("error reading .../openid-configuration response", err)
-    goto script_end
-  end
-  oidc_config = cjson.decode(body)
+  local body = res.body
   red_ok, red_err = red:set("bento_gateway:openid-config", body)
   if red_err then
     err_500_and_log("error caching openid-config to redis", red_err)
     goto script_end
   end
+  oidc_config = cjson.decode(body)
 else
   oidc_config = cjson.decode(res)
 end
