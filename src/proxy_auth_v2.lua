@@ -86,6 +86,7 @@ end
 
 local bento_debug = os.getenv("BENTO_DEBUG")
 bento_debug = bento_debug == "true" or bento_debug == "True" or bento_debug == "1"
+local ssl_verify = not bento_debug
 
 local c = http.new()
 local res
@@ -113,7 +114,7 @@ if res == ngx.null then
   end
 
   -- Fetch OpenID configuration - if in debug mode, don't verify the SSL certificate.
-  res, err = c:request_uri(OPENID_CONFIG_URL, {method="GET", ssl_verify=(not bento_debug)})
+  res, err = c:request_uri(OPENID_CONFIG_URL, {method="GET", ssl_verify=ssl_verify})
   if err then
     err_500_and_log("error in .../openid-configuration call", err)
     goto script_end
@@ -144,6 +145,7 @@ if auth_header and auth_header:match("^Bearer .+") then
   --  We are just using it as a way to transition to checking JWTs ourselves in each service.
   res, err = c:request_uri(oidc_config["introspection_endpoint"], {
     method="POST",
+    ssl_verify=ssl_verify,
     body="token=" .. auth_header:sub(auth_header:find(" ") + 1),
     headers={
       ["Content-Type"] = "application/x-www-form-urlencoded"
