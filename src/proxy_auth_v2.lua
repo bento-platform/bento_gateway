@@ -104,6 +104,11 @@ if red_err then
 end
 if res == ngx.null then
   local OPENID_CONFIG_URL = os.getenv("BENTO_OPENID_CONFIG_URL")
+  if OPENID_CONFIG_URL == nil then
+    err_500_and_log("unset OpenID configuration URL", "OPENID_CONFIG_URL == nil")
+    goto script_end
+  end
+
   res, err = c:request_uri(OPENID_CONFIG_URL, {method="GET"})
   if err then
     err_500_and_log("error in .../openid-configuration call", err)
