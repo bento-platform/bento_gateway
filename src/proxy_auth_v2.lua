@@ -84,6 +84,9 @@ end
 
 -- BEGIN AUTHORIZATION LOGIC ------------------------------------------------------------
 
+local bento_debug = os.getenv("BENTO_DEBUG")
+bento_debug = bento_debug == "true" or bento_debug == "True" or bento_debug == "1"
+
 local c = http.new()
 local res
 local err
@@ -109,7 +112,8 @@ if res == ngx.null then
     goto script_end
   end
 
-  res, err = c:request_uri(OPENID_CONFIG_URL, {method="GET"})
+  -- Fetch OpenID configuration - if in debug mode, don't verify the SSL certificate.
+  res, err = c:request_uri(OPENID_CONFIG_URL, {method="GET", ssl_verify=(not bento_debug)})
   if err then
     err_500_and_log("error in .../openid-configuration call", err)
     goto script_end
