@@ -1,6 +1,7 @@
 worker_processes 1;
 
 # expose env vars to lua code
+env BENTO_DEBUG;
 env CHORD_DEBUG;
 env CHORD_PERMISSIONS;
 env CHORD_PRIVATE_MODE;
