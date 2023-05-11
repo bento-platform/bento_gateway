@@ -87,7 +87,7 @@ end
 
 local bento_debug = os.getenv("BENTO_DEBUG")
 bento_debug = bento_debug == "true" or bento_debug == "True" or bento_debug == "1"
---local ssl_verify = not bento_debug
+local ssl_verify = not bento_debug
 
 local c = http.new()
 local res
@@ -108,6 +108,7 @@ if auth_header and auth_header:match("^Bearer .+") then
       ["Content-Type"] = "application/json",
       ["Authorization"] = auth_header,
     },
+    ssl_verify=ssl_verify,
   })
 
   if err then
