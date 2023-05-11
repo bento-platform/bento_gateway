@@ -98,9 +98,11 @@ local err
 local auth_header = ngx.req.get_headers()["Authorization"]
 if auth_header and auth_header:match("^Bearer .+") then
   local authz_service_url = os.getenv("BENTO_AUTHZ_SERVICE_URL")
+  local required_permissions = {"view:private_portal"}
+  setmetatable(required_permissions, cjson.array_mt)
   local req_body = cjson.encode({
     requested_resource={everything=True},
-    required_permissions={"view:private_portal"}
+    required_permissions=required_permissions,
   })
   res, err = c:request_uri(authz_service_url .. "policy/evaluate", {
     method="POST",
