@@ -98,12 +98,13 @@ local err
 local auth_header = ngx.req.get_headers()["Authorization"]
 if auth_header and auth_header:match("^Bearer .+") then
   local authz_service_url = os.getenv("BENTO_AUTHZ_SERVICE_URL")
+  local req_body = cjson.encode({
+    requested_resource={everything=True},
+    required_permissions={"view:private_portal"}
+  })
   res, err = c:request_uri(authz_service_url .. "policy/evaluate", {
     method="POST",
-    body=cjson.encode({
-      requested_resource={everything=True},
-      required_permissions={"view:private_portal"}
-    }),
+    body=req_body,
     headers={
       ["Content-Type"] = "application/json",
       ["Authorization"] = auth_header,
@@ -112,13 +113,14 @@ if auth_header and auth_header:match("^Bearer .+") then
   })
 
   if err then
-    err_500_and_log("error in authorization service call", err)
+    err_500_and_log("error in authorization service call | req: " .. req_body, err)
     goto script_end
   end
 
   if res.status ~= 200 then
     -- Bad response
-    err_500_and_log("bad status from authorization service call: " .. res.status, res.body)
+    err_500_and_log(
+      "bad status from authorization service call: " .. res.status .. " req: " .. req_body, res.body)
     goto script_end
   end
 
