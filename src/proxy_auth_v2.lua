@@ -122,7 +122,7 @@ if auth_header and auth_header:match("^Bearer .+") then
     goto script_end
   end
 
-  if not res.body["result"] then
+  if not cjson.decode(res.body or '{"result": false}')["result"] then
     -- Not allowed
     err_forbidden("forbidden")
     goto script_end
