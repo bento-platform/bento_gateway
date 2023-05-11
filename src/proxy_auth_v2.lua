@@ -101,7 +101,7 @@ if auth_header and auth_header:match("^Bearer .+") then
   local required_permissions = {"view:private_portal"}
   setmetatable(required_permissions, cjson.array_mt)
   local req_body = cjson.encode({
-    requested_resource={everything=True},
+    requested_resource={everything=true},
     required_permissions=required_permissions,
   })
   res, err = c:request_uri(authz_service_url .. "policy/evaluate", {
