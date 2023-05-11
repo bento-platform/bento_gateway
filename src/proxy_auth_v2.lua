@@ -3,6 +3,7 @@ local require = require
 
 local cjson = require("cjson")
 local http = require("resty.http")
+local jwt = require("resty.jwt")
 local redis = require("resty.redis")
 
 
@@ -86,104 +87,44 @@ end
 
 local bento_debug = os.getenv("BENTO_DEBUG")
 bento_debug = bento_debug == "true" or bento_debug == "True" or bento_debug == "1"
-local ssl_verify = not bento_debug
+--local ssl_verify = not bento_debug
 
 local c = http.new()
 local res
 local err
 
--- Check redis cache for OpenID configuration data; otherwise, fetch it.
-
-red_ok, red_err = redis_connect()
-if red_err then
-  err_500_and_log("error opening redis connection", red_err)
-  goto script_end
-end
-
-local oidc_config
-res, red_err = red:get("bento_gateway:openid-config")
-if red_err then
-  err_500_and_log("error fetching openid-config from redis", red_err)
-  goto script_end
-end
-if res == ngx.null then
-  local OPENID_CONFIG_URL = os.getenv("BENTO_OPENID_CONFIG_URL")
-  if OPENID_CONFIG_URL == nil then
-    err_500_and_log("unset OpenID configuration URL", "OPENID_CONFIG_URL == nil")
-    goto script_end
-  end
-
-  -- Fetch OpenID configuration - if in debug mode, don't verify the SSL certificate.
-  res, err = c:request_uri(OPENID_CONFIG_URL, {method="GET", ssl_verify=ssl_verify})
-  if err then
-    err_500_and_log("error in .../openid-configuration call", err)
-    goto script_end
-  end
-  local body = res.body
-  red_ok, red_err = red:set("bento_gateway:openid-config", body)
-  if red_err then
-    err_500_and_log("error caching openid-config to redis", red_err)
-    goto script_end
-  end
-  oidc_config = cjson.decode(body)
-else
-  oidc_config = cjson.decode(res)
-end
-
 -- Check bearer token if set
 -- Adapted from https://github.com/zmartzone/lua-resty-openidc/issues/266#issuecomment-542771402
 local auth_header = ngx.req.get_headers()["Authorization"]
 if auth_header and auth_header:match("^Bearer .+") then
-  red_ok, red_err = redis_connect()
-  if red_err then  -- Error occurred while connecting to Redis
-    err_500_and_log("error connecting to redis", red_err)
-    goto script_end
-  end
-
-  -- A Bearer auth header is set, check it is valid using the introspection endpoint
-  -- IMPORTANT NOTE: Technically we (as application developers) SHOULD NOT have access to this endpoint.
-  --  We are just using it as a way to transition to checking JWTs ourselves in each service.
-  res, err = c:request_uri(oidc_config["introspection_endpoint"], {
+  local authz_service_url = os.getenv("BENTO_AUTHZ_SERVICE_URL")
+  res, err = c:request_uri(authz_service_url .. "policy/evaluate", {
     method="POST",
-    ssl_verify=ssl_verify,
-    body="token=" .. auth_header:sub(auth_header:find(" ") + 1),
+    body=cjson.encode({
+      requested_resource={everything=True},
+      required_permissions={"view:private_portal"}
+    }),
     headers={
-      ["Content-Type"] = "application/x-www-form-urlencoded"
+      ["Content-Type"] = "application/json",
+      ["Authorization"] = auth_header,
     },
   })
 
   if err then
-    err_500_and_log("error in introspection call", err)
+    err_500_and_log("error in authorization service call", err)
     goto script_end
   end
 
-  local introspect_result
-  introspect_result, err = cjson.decode(res.body)
-  if err then
-    err_500_and_log("error reading introspection endpoint response", err)
+  if not res.body["result"] then
+    -- Not allowed
+    err_forbidden("forbidden")
     goto script_end
   end
 
-  local introspect_err = introspect_result["error"]
-  if introspect_err ~= nil then
-    ngx.log(ngx.ERR, "error from introspection endpoint", introspect_err, introspect_result["error_description"])
-    err_forbidden("invalid token")  -- generic error - don't reveal too much
-    goto script_end
-  end
-
-  if not introspect_result["active"] then
-    err_forbidden("inactive token - DNE or expired or bad client")
-    goto script_end
-  end
-
-  local client_id = os.getenv("CLIENT_ID")
-  if introspect_result["client_id"] ~= client_id then
-    err_forbidden("token has wrong client ID")
-    goto script_end
-  end
+  local decoded_jwt = jwt:load_jwt(auth_header:sub(auth_header:find(" ") + 1))
 
   -- If the script gets here, no error occurred and we can pass the request through
-  ngx.req.set_header("X-User", introspect_result["sub"])
+  ngx.req.set_header("X-User", decoded_jwt["payload"]["sub"])
   -- Hard-coded since that is what was in proxy_auth v1 as well for Dockerized version of Bento:
   ngx.req.set_header("X-User-Role", "admin")
   ngx.req.set_header("X-Authorization", auth_header)
