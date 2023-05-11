@@ -116,6 +116,12 @@ if auth_header and auth_header:match("^Bearer .+") then
     goto script_end
   end
 
+  if res.status ~= 200 then
+    -- Bad response
+    err_500_and_log("bad status from authorization service call: " .. res.status, res.body)
+    goto script_end
+  end
+
   if not res.body["result"] then
     -- Not allowed
     err_forbidden("forbidden")
