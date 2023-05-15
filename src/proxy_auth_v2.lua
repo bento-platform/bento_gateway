@@ -137,6 +137,8 @@ local err
 local user_id
 local user_role
 
+local req_headers = ngx.req.get_headers()
+
 local ott_header = req_headers["X-OTT"]
 local tt_header = req_headers["X-TT"]
 if ott_header and not URI:match("^/api/auth") then
