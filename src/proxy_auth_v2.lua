@@ -9,11 +9,15 @@ local redis = require("resty.redis")
 
 -- START FUNCTION DEFINITIONS -----------------------------------------------------------
 local NGX_NULL = ngx.null
-local ngx_null_to_nil = function (v)
-  if v == NGX_NULL then return nil else return v end
+local ngx_null_to_nil = function(v)
+  if v == NGX_NULL then
+    return nil
+  else
+    return v
+  end
 end
 
-local invalidate_ott = function (redis_conn, token)
+local invalidate_ott = function(redis_conn, token)
   -- Helper method to invalidate a one-time token, given a connection to the
   -- Redis instance being used and the token in question
   redis_conn:hdel("bento_ott:expiry", token)
@@ -22,7 +26,7 @@ local invalidate_ott = function (redis_conn, token)
   redis_conn:hdel("bento_ott:user_role", token)
 end
 
-local invalidate_tt = function (redis_conn, token)
+local invalidate_tt = function(redis_conn, token)
   -- Helper method to invalidate a one-time token, given a connection to the
   -- Redis instance being used and the token in question
   redis_conn:hdel("bento_tt:expiry", token)
@@ -31,40 +35,44 @@ local invalidate_tt = function (redis_conn, token)
   redis_conn:hdel("bento_tt:user_role", token)
 end
 
-local uncached_response = function (status, mime, message)
+local uncached_response = function(status, mime, message)
   -- Helper method to return uncached responses directly from the proxy without
   -- needing an underlying service.
   ngx.status = status
-  if mime then ngx.header["Content-Type"] = mime end
+  if mime then
+    ngx.header["Content-Type"] = mime
+  end
   ngx.header["Cache-Control"] = "no-store"
   ngx.header["Pragma"] = "no-cache"  -- Backwards-compatibility for no-cache
-  if message then ngx.say(message) end
+  if message then
+    ngx.say(message)
+  end
   ngx.exit(status)
 end
 
-local err_invalid_req_body = function ()
+local err_invalid_req_body = function()
   uncached_response(ngx.HTTP_BAD_REQUEST, "application/json",
-          cjson.encode({message="Missing or invalid body", detail="invalid body"}))
+    cjson.encode({ message = "Missing or invalid body", detail = "invalid body" }))
 end
 
 local err_invalid_method = function()
   uncached_response(ngx.HTTP_NOT_ALLOWED, "application/json",
-          cjson.encode({message="Method not allowed", detail="invalid method"}))
+    cjson.encode({ message = "Method not allowed", detail = "invalid method" }))
 end
 
-local err_forbidden = function (detail)
+local err_forbidden = function(detail)
   uncached_response(
     ngx.HTTP_FORBIDDEN,
     "application/json",
-    cjson.encode({message="Forbidden", detail=detail})
+    cjson.encode({ message = "Forbidden", detail = detail })
   )
 end
 
-local err_500_and_log = function (detail, err)
+local err_500_and_log = function(detail, err)
   ngx.log(ngx.ERR, detail, " err: ", err)
   uncached_response(ngx.HTTP_INTERNAL_SERVER_ERROR,
     "application/json",
-    cjson.encode({message="Internal server error", detail=detail}))
+    cjson.encode({ message = "Internal server error", detail = detail }))
 end
 -- END FUNCTION DEFINITIONS -----–-----–-----–-----–-----–-----–-----–-----–-----–-------
 
@@ -83,15 +91,16 @@ local REDIS_PORT
 
 if REDIS_CONNECTION_STRING:match("^unix") then
   REDIS_SOCKET = REDIS_CONNECTION_STRING
-else  -- Treat as host/port
+else
+  -- Treat as host/port
   -- Format: localhost:6379
   local port_sep = REDIS_CONNECTION_STRING:find(":")
   if port_sep == nil then
     REDIS_HOST = REDIS_CONNECTION_STRING
     REDIS_PORT = 6379  -- Default Redis port
   else
-    REDIS_HOST = REDIS_CONNECTION_STRING:sub(1, port_sep-1)
-    REDIS_PORT = tonumber(REDIS_CONNECTION_STRING:sub(port_sep+1, #REDIS_CONNECTION_STRING))
+    REDIS_HOST = REDIS_CONNECTION_STRING:sub(1, port_sep - 1)
+    REDIS_PORT = tonumber(REDIS_CONNECTION_STRING:sub(port_sep + 1, #REDIS_CONNECTION_STRING))
   end
 end
 
@@ -102,11 +111,11 @@ if red_err then
   uncached_response(
     ngx.HTTP_INTERNAL_SERVER_ERROR,
     "application/json",
-    cjson.encode({message=red_err, tag="ott redis conn", user_role=nil}))
+    cjson.encode({ message = red_err, tag = "ott redis conn", user_role = nil }))
 end
 
 -- Function to handle common Redis connection tasks
-local redis_connect = function ()
+local redis_connect = function()
   if REDIS_SOCKET then
     return red:connect(REDIS_SOCKET)
   else
@@ -139,7 +148,8 @@ if ott_header and not URI:match("^/api/auth") then
   -- validation anyway, but manually check it as a last resort
 
   red_ok, red_err = redis_connect()
-  if red_err then  -- Error occurred while connecting to Redis
+  if red_err then
+    -- Error occurred while connecting to Redis
     err_500_and_log("redis conn", red_err)
     goto script_end
   end
@@ -165,18 +175,18 @@ if ott_header and not URI:match("^/api/auth") then
   if expiry == nil then
     -- Token cannot be found in the Redis store
     uncached_response(ngx.HTTP_FORBIDDEN, "application/json",
-      cjson.encode({message="Invalid one-time token", tag="ott invalid"}))
+      cjson.encode({ message = "Invalid one-time token", tag = "ott invalid" }))
   elseif expiry < ngx.time() then
     -- Token expiry date is in the past, so it is no longer valid
     uncached_response(ngx.HTTP_FORBIDDEN, "application/json",
-      cjson.encode({message="Expired one-time token", tag="ott expired"}))
+      cjson.encode({ message = "Expired one-time token", tag = "ott expired" }))
   elseif URI:sub(1, #scope) ~= scope then
     -- Invalid call made with the token (out of scope)
     -- We're harsh here and still delete the token out of security concerns
     uncached_response(ngx.HTTP_FORBIDDEN, "application/json",
       cjson.encode({
-        message="Out-of-scope one-time token (scope: " .. scope .. ", URI prefix: " .. URI:sub(1, #scope) .. ")",
-        detail="ott out of scope"}))
+        message = "Out-of-scope one-time token (scope: " .. scope .. ", URI prefix: " .. URI:sub(1, #scope) .. ")",
+        detail = "ott out of scope" }))
   end
 
   -- No nested auth header is set; OTTs cannot be used to bootstrap a full bearer token
@@ -196,7 +206,8 @@ elseif tt_header and not URI:match("^/api/auth") then
   -- validation anyway, but manually check it as a last resort
 
   red_ok, red_err = redis_connect()
-  if red_err then  -- Error occurred while connecting to Redis
+  if red_err then
+    -- Error occurred while connecting to Redis
     err_500_and_log("redis conn", red_err)
     goto script_end
   end
@@ -219,7 +230,7 @@ elseif tt_header and not URI:match("^/api/auth") then
   if expiry == nil then
     -- Token cannot be found in the Redis store
     uncached_response(ngx.HTTP_FORBIDDEN, "application/json",
-            cjson.encode({message="Invalid temporary token", tag="tt invalid", user_role=nil}))
+      cjson.encode({ message = "Invalid temporary token", tag = "tt invalid", user_role = nil }))
   elseif expiry < ngx.time() then
     -- Token expiry date is in the past, so it is no longer valid
     red:init_pipeline(5)
@@ -227,15 +238,15 @@ elseif tt_header and not URI:match("^/api/auth") then
     red:commit_pipeline()
 
     uncached_response(ngx.HTTP_FORBIDDEN, "application/json",
-            cjson.encode({message="Expired temporary token", tag="tt expired", user_role=nil}))
+      cjson.encode({ message = "Expired temporary token", tag = "tt expired", user_role = nil }))
   elseif URI:sub(1, #scope) ~= scope then
     -- Invalid call made with the token (out of scope)
     -- We're harsh here and still delete the token out of security concerns
     uncached_response(ngx.HTTP_FORBIDDEN, "application/json",
-            cjson.encode({
-              message="Out-of-scope temporary token (scope: " .. scope .. ", URI prefix: " .. URI:sub(1, #scope) .. ")",
-              tag="tt out of scope",
-              user_role=nil}))
+      cjson.encode({
+        message = "Out-of-scope temporary token (scope: " .. scope .. ", URI prefix: " .. URI:sub(1, #scope) .. ")",
+        tag = "tt out of scope",
+        user_role = nil }))
   end
 
   -- No nested auth header is set; OTTs cannot be used to bootstrap a full bearer token
@@ -252,20 +263,20 @@ else
   local auth_header = ngx.req.get_headers()["Authorization"]
   if auth_header and auth_header:match("^Bearer .+") then
     local authz_service_url = os.getenv("BENTO_AUTHZ_SERVICE_URL")
-    local required_permissions = {"view:private_portal"}
+    local required_permissions = { "view:private_portal" }
     setmetatable(required_permissions, cjson.array_mt)
     local req_body = cjson.encode({
-      requested_resource={everything=true},
-      required_permissions=required_permissions,
+      requested_resource = { everything = true },
+      required_permissions = required_permissions,
     })
     res, err = c:request_uri(authz_service_url .. "policy/evaluate", {
-      method="POST",
-      body=req_body,
-      headers={
+      method = "POST",
+      body = req_body,
+      headers = {
         ["Content-Type"] = "application/json",
         ["Authorization"] = auth_header,
       },
-      ssl_verify=ssl_verify,
+      ssl_verify = ssl_verify,
     })
 
     if err then
@@ -276,7 +287,7 @@ else
     if res.status ~= 200 then
       -- Bad response
       err_500_and_log(
-              "bad status from authorization service call: " .. res.status .. " req: " .. req_body, res.body)
+        "bad status from authorization service call: " .. res.status .. " req: " .. req_body, res.body)
       goto script_end
     end
 
@@ -336,7 +347,7 @@ else
       local scope = ngx_req_body["scope"]
       if not scope or type(scope) ~= "string" then
         uncached_response(ngx.HTTP_BAD_REQUEST, "application/json",
-          cjson.encode({message="Missing or invalid token scope", tag="invalid scope", user_role=user_role}))
+          cjson.encode({ message = "Missing or invalid token scope", tag = "invalid scope", user_role = user_role }))
         goto script_end
       end
 
@@ -346,7 +357,7 @@ else
 
       if not scope:match("^/api/%a[%w-_]*/") or scope:match("^/api/auth") then
         uncached_response(ngx.HTTP_BAD_REQUEST, "application/json",
-          cjson.encode({message="Bad token scope", tag="bad scope", user_role=user_role}))
+          cjson.encode({ message = "Bad token scope", tag = "bad scope", user_role = user_role }))
         goto script_end
       end
 
@@ -355,7 +366,7 @@ else
       -- Don't let a user request more than 30 OTTs at a time
       if n_tokens > 30 then
         uncached_response(ngx.HTTP_BAD_REQUEST, "application/json",
-          cjson.encode({message="Too many OTTs requested", tag="too many tokens", user_role=user_role}))
+          cjson.encode({ message = "Too many OTTs requested", tag = "too many tokens", user_role = user_role }))
         goto script_end
       end
 
@@ -422,7 +433,7 @@ else
       local scope = ngx_req_body["scope"]
       if not scope or type(scope) ~= "string" then
         uncached_response(ngx.HTTP_BAD_REQUEST, "application/json",
-          cjson.encode({message="Missing or invalid token scope", tag="invalid scope"}))
+          cjson.encode({ message = "Missing or invalid token scope", tag = "invalid scope" }))
         goto script_end
       end
 
@@ -432,7 +443,7 @@ else
 
       if not scope:match("^/api/%a[%w-_]*/") or scope:match("^/api/auth") then
         uncached_response(ngx.HTTP_BAD_REQUEST, "application/json",
-          cjson.encode({message="Bad token scope", tag="bad scope"}))
+          cjson.encode({ message = "Bad token scope", tag = "bad scope" }))
         goto script_end
       end
 
@@ -441,7 +452,7 @@ else
       -- Don't let a user request more than 30 TTs at a time
       if n_tokens > 30 then
         uncached_response(ngx.HTTP_BAD_REQUEST, "application/json",
-          cjson.encode({message="Too many TTs requested", tag="too many tokens"}))
+          cjson.encode({ message = "Too many TTs requested", tag = "too many tokens" }))
         goto script_end
       end
 
@@ -504,7 +515,7 @@ else
       local token = ngx_req_body["token"]
       if not token or type(token) ~= "string" then
         uncached_response(ngx.HTTP_BAD_REQUEST, "application/json",
-          cjson.encode({message="Missing or invalid token", tag="invalid token"}))
+          cjson.encode({ message = "Missing or invalid token", tag = "invalid token" }))
         goto script_end
       end
 
@@ -570,4 +581,4 @@ end
 
 -- If an unrecoverable error occurred, it will jump here to skip everything and
 -- avoid trying to execute code while in an invalid state.
-::script_end::
+:: script_end ::
