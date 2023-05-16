@@ -5,6 +5,7 @@ local cjson = require("cjson")
 local http = require("resty.http")
 local jwt = require("resty.jwt")
 local redis = require("resty.redis")
+local str = require("resty.string")
 
 
 -- START FUNCTION DEFINITIONS -----------------------------------------------------------
