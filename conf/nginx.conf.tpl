@@ -225,7 +225,7 @@ http {
             limit_req zone=perip burst=10 nodelay;
             limit_req zone=perserver burst=30;
             set_by_lua_block $original_uri { return ngx.var.uri }
-            content_by_lua_file /gateway/src/proxy_auth.lua;
+            content_by_lua_file /gateway/src/proxy_auth_v2.lua;
         }
 
         # Include all service location blocks (mounted into the container)
