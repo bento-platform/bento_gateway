@@ -126,6 +126,10 @@ end
 
 -- BEGIN AUTHORIZATION LOGIC ------------------------------------------------------------
 
+-- Cache commonly-used ngx.var.uri and ngx.var.request_method to save expensive access calls
+local URI = ngx.var.original_uri or ngx.var.uri or ""
+local REQUEST_METHOD = ngx.var.request_method or "GET"
+
 local bento_debug = os.getenv("BENTO_DEBUG")
 bento_debug = bento_debug == "true" or bento_debug == "True" or bento_debug == "1"
 local ssl_verify = not bento_debug
@@ -313,10 +317,6 @@ else
 
 
     -- TEMPORARY TOKEN HANDLING LOGIC -------------------------------------------------------
-
-    -- Cache commonly-used ngx.var.uri and ngx.var.request_method to save expensive access calls
-    local URI = ngx.var.original_uri or ngx.var.uri or ""
-    local REQUEST_METHOD = ngx.var.request_method or "GET"
 
     local ONE_TIME_TOKENS_GENERATE_PATH = "/api/auth/ott/generate"
     local ONE_TIME_TOKENS_INVALIDATE_PATH = "/api/auth/ott/invalidate"
