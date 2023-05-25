@@ -86,6 +86,10 @@ http {
         ''      close;
     }
 
+    # Configure Lua HTTPS verification
+    lua_ssl_verify_depth        2;
+    lua_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+
 
     # Redirect all http to https
     server {
