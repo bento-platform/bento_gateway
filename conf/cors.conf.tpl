@@ -2,11 +2,10 @@ add_header Content-Security-Policy "frame-src 'self' ${BENTOV2_GATEWAY_PUBLIC_AL
 add_header X-XSS-Protection "1; mode=block";
 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
-if ($http_origin = https://${BENTOV2_DOMAIN}) {
-    set $cors true;
-}
-if ($http_origin = https://${BENTOV2_PORTAL_DOMAIN}) {
-    set $cors true;
+map $http_origin $cors {
+    default                          0;
+    https://${BENTOV2_DOMAIN}        1;
+    https://${BENTOV2_PORTAL_DOMAIN} 1;
 }
 
 if ($cors) {
