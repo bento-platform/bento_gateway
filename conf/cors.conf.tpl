@@ -3,6 +3,7 @@ add_header X-XSS-Protection "1; mode=block";
 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
 add_header X-origin $http_origin;
+add_header X-public-cors $public_cors;
 
 if ($public_cors) {
     add_header Access-Control-Allow-Origin      $http_origin  always;
