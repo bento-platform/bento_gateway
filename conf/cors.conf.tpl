@@ -4,9 +4,6 @@ add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" alway
 
 add_header X-public-cors $public_cors;
 
-if ($public_cors = 1) {
-    add_header X-origin $http_origin;
-    add_header Access-Control-Allow-Origin      $http_origin  always;
-    add_header Access-Control-Allow-Credentials true          always;
-    add_header Access-Control-Allow-Headers     authorization always;
-}
+add_header Access-Control-Allow-Origin      $public_cors  always;
+add_header Access-Control-Allow-Credentials true          always;
+add_header Access-Control-Allow-Headers     authorization always;
