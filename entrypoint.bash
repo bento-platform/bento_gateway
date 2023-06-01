@@ -54,6 +54,11 @@ done
 # Process the main NGINX conf. template, using only the selected variables:
 #  - this avoids the ${DOLLAR}-type hack needed before
 echo "[bento_gateway] [entrypoint] writing main NGINX configuration"
+
+envsubst "$(cat ./VARIABLES)" \
+  < ./conf/cors.conf.tpl \
+  > /usr/local/openresty/nginx/conf/cors.conf
+
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/nginx.conf.tpl \
   > ./nginx.conf.pre
