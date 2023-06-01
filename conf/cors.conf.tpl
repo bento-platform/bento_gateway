@@ -4,13 +4,7 @@ add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" alway
 
 add_header X-origin $http_origin;
 
-map $http_origin $cors {
-    default                          0;
-    https://${BENTOV2_DOMAIN}        1;
-    https://${BENTOV2_PORTAL_DOMAIN} 1;
-}
-
-if ($cors) {
+if ($public_cors) {
     add_header Access-Control-Allow-Origin      $http_origin  always;
     add_header Access-Control-Allow-Credentials true          always;
     add_header Access-Control-Allow-Headers     authorization always;

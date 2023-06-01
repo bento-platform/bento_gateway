@@ -114,8 +114,12 @@ http {
         ssl_reject_handshake on;
     }
 
-
     # Bento Public
+    map $http_origin $public_cors {
+        default                          0;
+        https://${BENTOV2_DOMAIN}        1;
+        https://${BENTOV2_PORTAL_DOMAIN} 1;
+    }
     server {
         # Use 444 for internal SSL to allow streaming back to self (above)
         listen 444 ssl;
