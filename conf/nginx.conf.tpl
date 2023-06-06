@@ -38,8 +38,8 @@ stream {
     # server_name doesn't exist in stream blocks
     # instead, use SSL preread to redirect either back to the gateway or to the auth container,
     # since we want to terminate SSL at Keycloak, not at the gateway.
-    map_hash_max_size 262144;
-    map_hash_bucket_size 262144;
+    map_hash_max_size 128;
+    map_hash_bucket_size 128;
     map $ssl_preread_server_name $name {
         # tpl__internal_idp__start
         ${BENTOV2_AUTH_DOMAIN}  ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
@@ -83,8 +83,8 @@ http {
     proxy_next_upstream off;
 
     # From http://nginx.org/en/docs/http/websocket.html
-    map_hash_max_size 262144;
-    map_hash_bucket_size 262144;
+    map_hash_max_size 128;
+    map_hash_bucket_size 128;
     map $http_upgrade $connection_upgrade {
         default upgrade;
         ''      close;
