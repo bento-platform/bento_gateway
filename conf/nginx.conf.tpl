@@ -2,22 +2,7 @@ worker_processes 1;
 
 # expose env vars to lua code
 env BENTO_DEBUG;
-env CHORD_DEBUG;
-env CHORD_PERMISSIONS;
-env CHORD_PRIVATE_MODE;
-env CHORD_URL;
-
-env OIDC_DISCOVERY_URI;  # TODO: remove
-env BENTO_OPENID_CONFIG_URL;
 env BENTO_AUTHZ_SERVICE_URL;
-env REDIRECT_AFTER_LOGOUT_URI;  # TODO: remove
-env CLIENT_ID;
-env TOKEN_ENDPOINT_AUTH_METHOD;
-
-# TODO: move to secret instead of using env
-env CLIENT_SECRET;
-
-env CBIOPORTAL_URL;
 
 error_log stderr info;
 
