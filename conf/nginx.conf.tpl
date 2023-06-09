@@ -244,10 +244,6 @@ http {
         # Frame embedding: allow private portal to embed cBioPortal as an iframe:
         add_header Content-Security-Policy "frame-ancestors 'self' https://${BENTOV2_PORTAL_DOMAIN};";
 
-        # CHORD constants (configuration file locations)
-        set $chord_auth_config     "{auth_config}";
-        set $chord_instance_config "{instance_config}";
-
         # lua-resty-session configuration
         #  - This is important! It configures exactly how we want our sessions to function,
         #    and allows us to share session data across multiple workers.

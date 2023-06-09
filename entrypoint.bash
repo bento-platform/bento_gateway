@@ -44,9 +44,6 @@ echo "[bento_gateway] [entrypoint] gathering environment variables for configura
 for v in $(env | awk -F "=" '{print $1}' | grep "BENTO*"); do
   echo "\${${v}}" >> ./VARIABLES
 done
-for v in $(env | awk -F "=" '{print $1}' | grep "CHORD*"); do
-  echo "\${${v}}" >> ./VARIABLES
-done
 for v in $(env | awk -F "=" '{print $1}' | grep "GATEWAY*"); do
   echo "\${${v}}" >> ./VARIABLES
 done
