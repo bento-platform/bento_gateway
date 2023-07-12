@@ -1,8 +1,7 @@
 FROM openresty/openresty:1.21.4.1-8-alpine-fat
 
 # Install apt and lua dependencies
-RUN apk update && \
-    apk add git bash python3 && \
+RUN apk add --no-cache git bash python3 && \
     /usr/local/openresty/luajit/bin/luarocks install lua-resty-session && \
     /usr/local/openresty/luajit/bin/luarocks install lua-resty-openidc
 
