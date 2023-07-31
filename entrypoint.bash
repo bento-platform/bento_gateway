@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export BENTO_GATEWAY_CONF_DIR='/usr/local/openresty/nginx/conf'
+
 # WORKDIR: /gateway
 
 # Utility function - historically there's been some inconsistency in what value we use for "true"
@@ -25,7 +27,7 @@ function service_templates_to_confs () {
       echo "[bento_gateway] [entrypoint]    writing ${outfile}"
       envsubst "$(cat ./VARIABLES)" \
         < "${f}" \
-        > "/usr/local/openresty/nginx/conf/bento_${1}/${outfile}"
+        > "${BENTO_GATEWAY_CONF_DIR}/bento_${1}/${outfile}"
     else
       echo "[bento_gateway] [entrypoint]    not enabling ${filename}"
     fi
@@ -54,7 +56,7 @@ echo "[bento_gateway] [entrypoint] writing main NGINX configuration"
 
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/cors.conf.tpl \
-  > /usr/local/openresty/nginx/conf/cors.conf
+  > "${BENTO_GATEWAY_CONF_DIR}/cors.conf"
 
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/nginx.conf.tpl \
@@ -90,10 +92,10 @@ else
 fi
 
 # Move nginx.conf into position
-cp ./nginx.conf.pre /usr/local/openresty/nginx/conf/nginx.conf
+cp ./nginx.conf.pre "${BENTO_GATEWAY_CONF_DIR}/nginx.conf"
 rm ./nginx.conf.pre*  # Remove pre-final file + any backups
 
-cat /usr/local/openresty/nginx/conf/nginx.conf
+cat "${BENTO_GATEWAY_CONF_DIR}/nginx.conf"
 
 # Process any public service templates, using only the selected variables:
 echo "[bento_gateway] [entrypoint] writing public service NGINX configuration"
