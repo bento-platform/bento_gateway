@@ -163,35 +163,10 @@ http {
         add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
         # --
 
-
-        # CHORD constants (configuration file locations)
-        set $chord_auth_config     "{auth_config}";
-        set $chord_instance_config "{instance_config}";
-
-        # lua-resty-session configuration
-        #  - This is important! It configures exactly how we want our sessions to function,
-        #    and allows us to share session data across multiple workers.
-        set $session_cipher           none;   # SECURITY: only use this with Redis; don't need to encrypt session ID
-        set $session_cookie_samesite  None;  # Needs to be none(?), otherwise our session cookie gets weird
-        set $session_storage          redis;
-        set $session_redis_prefix     oidc;
-        set $session_redis_host       ${BENTOV2_REDIS_CONTAINER_NAME};
-        set $session_secret           ${BENTOV2_SESSION_SECRET};
-
-        # - Per lua-resty-session, the 'regenerate' strategy is more reliable for
-        #   SPAs which make a lot of asynchronous requests, as it does not
-        #   immediately replace the old records for sessions when making a new one.
-        # - We don't need locking with regenerate session strat: https://github.com/bungle/lua-resty-session/issues/113
-        #   This can help performance if we forget to release a lock / close a session somewhere.
-        set $session_redis_uselocking  no;
-        set $session_strategy          regenerate;
-
-
         # Web
         location / {
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
-            # include /gateway/conf/proxy_private.conf;
 
             set $request_url $request_uri;
             set $url $uri;
@@ -217,14 +192,6 @@ http {
             content_by_lua_file /gateway/src/node_info.lua;
         }
 
-        # -- User Auth
-        location ~ /api/auth {
-            limit_req zone=perip burst=10 nodelay;
-            limit_req zone=perserver burst=30;
-            set_by_lua_block $original_uri { return ngx.var.uri }
-            content_by_lua_file /gateway/src/proxy_auth_v2.lua;
-        }
-
         # Include all service location blocks (mounted into the container)
         include bento_services/*.conf;
     }
@@ -243,24 +210,6 @@ http {
 
         # Frame embedding: allow private portal to embed cBioPortal as an iframe:
         add_header Content-Security-Policy "frame-ancestors 'self' https://${BENTOV2_PORTAL_DOMAIN};";
-
-        # lua-resty-session configuration
-        #  - This is important! It configures exactly how we want our sessions to function,
-        #    and allows us to share session data across multiple workers.
-        set $session_cipher           none;   # SECURITY: only use this with Redis; don't need to encrypt session ID
-        set $session_cookie_samesite  None;  # Needs to be none(?), otherwise our session cookie gets weird
-        set $session_storage          redis;
-        set $session_redis_prefix     oidc;
-        set $session_redis_host       ${BENTOV2_REDIS_CONTAINER_NAME};
-        set $session_secret           ${BENTOV2_SESSION_SECRET};
-
-        # - Per lua-resty-session, the 'regenerate' strategy is more reliable for
-        #   SPAs which make a lot of asynchronous requests, as it does not
-        #   immediately replace the old records for sessions when making a new one.
-        # - We don't need locking with regenerate session strat: https://github.com/bungle/lua-resty-session/issues/113
-        #   This can help performance if we forget to release a lock / close a session somewhere.
-        set $session_redis_uselocking  no;
-        set $session_strategy          regenerate;
 
         # Proxy pass to cBioPortal container
         location / {
