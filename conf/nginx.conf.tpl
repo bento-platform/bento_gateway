@@ -185,17 +185,9 @@ http {
             return 404;
         }
 
-        # -- Public node-info
-        location = /api/node-info {
-            limit_req zone=perip burst=10 nodelay;
-            limit_req zone=perserver burst=30;
-            content_by_lua_file /gateway/src/node_info.lua;
-        }
-
         # Include all service location blocks (mounted into the container)
         include bento_services/*.conf;
     }
-
 
     # tpl__use_cbioportal__start
     # cBioPortal
@@ -216,9 +208,6 @@ http {
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
             include /gateway/conf/proxy_cbioportal.conf;
-
-            set $request_url $request_uri;
-            set $url $uri;
 
             # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
             set $upstream_cbio http://${BENTO_CBIOPORTAL_CONTAINER_NAME}:${BENTO_CBIOPORTAL_INTERNAL_PORT};
