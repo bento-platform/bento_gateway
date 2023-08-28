@@ -138,6 +138,30 @@ http {
         }
         # tpl__use_bento_public__end
 
+        # -- Fallback 404 to avoid returning web HTML when an API request is made
+        location /api/ {
+            return 404;
+        }
+
+        # tpl__use_minio__start
+        # -- Minio
+        location /api/minio { return 302 https://${BENTOV2_DOMAIN}/api/minio/; }
+        location /api/minio/ {
+            # Reverse proxy settings
+            include /gateway/conf/proxy.conf;
+            include /gateway/conf/proxy_minio.conf;
+
+            # Pass rewritten request to Minio
+            rewrite ^ $request_uri;
+            rewrite ^/api/minio/(.*) /$1 break;
+            return 400;
+            proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_INTERNAL_PORT}$uri;
+
+            # Log errors
+            error_log /var/log/bento_minio_errors.log;
+        }
+        # tpl__use_minio__end
+
         # Include all public service location blocks (mounted into the container)
         include bento_public_services/*.conf;
 

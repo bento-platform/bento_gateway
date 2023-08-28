@@ -82,6 +82,14 @@ else
     '/tpl__use_bento_public__start/,/tpl__use_bento_public__end/d' \
     ./nginx.conf.pre
 fi
+if [[ "$(true_values_to_1 $BENTO_MINIO_ENABLED)" == 1 ]]; then
+  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use Minio"
+else
+  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to disable Minio"
+  sed -i.bak \
+      '/tpl__use_minio__start/,/tpl__use_minio__end/d' \
+      ./nginx.conf.pre
+fi
 if [[ "$(true_values_to_1 $BENTO_CBIOPORTAL_ENABLED)" == 1 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use cBioPortal"
 else
