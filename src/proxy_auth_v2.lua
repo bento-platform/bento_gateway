@@ -54,9 +54,19 @@ local user_role
 
 -- Check bearer token if set
 -- Adapted from https://github.com/zmartzone/lua-resty-openidc/issues/266#issuecomment-542771402
-local auth_header = ngx.req.get_headers()["Authorization"]
-if auth_header and auth_header:match("^Bearer .+") then
+local req = ngx.req
+local auth_header = req.get_headers()["Authorization"]
 
+-- Tokens can also be passed in the form of POST body form data
+if req.get_method() == "POST" then
+  req.read_body()
+  local req_body = req.get_post_args()
+  if req_body ~= nil and req_body["token"] then
+    auth_header = "Bearer " .. req_body["token"]
+  end
+end
+
+if auth_header and auth_header:match("^Bearer .+") then
   local authz_service_url = os.getenv("BENTO_AUTHZ_SERVICE_URL")
   local required_permissions = { "view:private_portal" }
   setmetatable(required_permissions, cjson.array_mt)

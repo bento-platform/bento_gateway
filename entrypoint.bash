@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "[bento_gateway] [entrypoint] ========== begin gateway entrypoint =========="
+
 export BENTO_GATEWAY_CONF_DIR='/usr/local/openresty/nginx/conf'
 
 # WORKDIR: /gateway
@@ -54,10 +56,13 @@ done
 #  - this avoids the ${DOLLAR}-type hack needed before
 echo "[bento_gateway] [entrypoint] writing main NGINX configuration"
 
+CORS_PATH="${BENTO_GATEWAY_CONF_DIR}/cors.conf"
+echo "[bento_gateway] [entrypoint] creating ${CORS_PATH}"
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/cors.conf.tpl \
-  > "${BENTO_GATEWAY_CONF_DIR}/cors.conf"
+  > "${CORS_PATH}"
 
+echo "[bento_gateway] [entrypoint] creating nginx.conf.pre"
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/nginx.conf.tpl \
   > ./nginx.conf.pre
