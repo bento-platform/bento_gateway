@@ -10,6 +10,7 @@ events {
     worker_connections 1024;
 }
 
+# tpl__tls_yes__start
 # Pass through SSL connection to either Keycloak or the Bento gateway.
 # - Don't change the # -- ... -- lines, as they are used to find/replace chunks.
 # - Can't add security headers on stream blocks - rely on Keycloak's own security settings.
@@ -39,6 +40,7 @@ stream {
         proxy_pass  $name;
     }
 }
+# tpl__tls_yes__end
 
 http {
     # Use the Docker embedded DNS server
@@ -75,10 +77,11 @@ http {
         ''      close;
     }
 
+    # tpl__tls_yes__start
+
     # Configure Lua HTTPS verification
     lua_ssl_verify_depth        2;
     lua_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
-
 
     # Redirect all http to https
     server {
@@ -96,7 +99,6 @@ http {
         return 301 https://$host$request_uri;
     }
 
-
     # No unspecified domain funnies allowed!
     server {
         listen 444 ssl;
@@ -109,14 +111,35 @@ http {
         https://${BENTOV2_DOMAIN}        https://${BENTOV2_DOMAIN};
         https://${BENTOV2_PORTAL_DOMAIN} https://${BENTOV2_PORTAL_DOMAIN};
     }
+
+    # tpl__tls_yes__end
+
+    # tpl__tls_no__start
+    # Bento Public
+    map $http_origin $public_cors {
+        default                          '';
+        http://${BENTOV2_DOMAIN}        http://${BENTOV2_DOMAIN};
+        http://${BENTOV2_PORTAL_DOMAIN} http://${BENTOV2_PORTAL_DOMAIN};
+    }
+    # tpl__tls_no__end
+
     server {
+        # tpl__tls_yes__start
         # Use 444 for internal SSL to allow streaming back to self (above)
         listen 444 ssl;
+        # tpl__tls_yes__end
+
+        # tpl__tls_no__start
+        # Use 81 for internal HTTP to allow streaming back to self (above)
+        listen 80;
+        # tpl__tls_no__end
 
         server_name ${BENTOV2_DOMAIN};
 
+        # tpl__tls_yes__start
         ssl_certificate ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_FULLCHAIN_RELATIVE_PATH};
         ssl_certificate_key ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_PRIVKEY_RELATIVE_PATH};
+        # tpl__tls_yes__end
 
         # Security --
         add_header Content-Security-Policy "frame-src 'self' ${BENTOV2_GATEWAY_PUBLIC_ALLOW_FRAME_DOMAINS};";
@@ -149,13 +172,21 @@ http {
 
     # Bento Portal
     server {
+        # tpl__tls_yes__start
         # Use 444 for internal SSL to allow streaming back to self (above)
         listen 444 ssl;
+        # tpl__tls_yes__end
+
+        # tpl__tls_no__start
+        listen 80;
+        # tpl__tls_no__end
 
         server_name ${BENTOV2_PORTAL_DOMAIN};
 
+        # tpl__tls_yes__start
         ssl_certificate ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_PORTAL_FULLCHAIN_RELATIVE_PATH};
         ssl_certificate_key ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_PORTAL_PRIVKEY_RELATIVE_PATH};
+        # tpl__tls_yes__end
 
         # Security --
         add_header X-Frame-Options "SAMEORIGIN";
@@ -191,30 +222,6 @@ http {
 
     # tpl__use_cbioportal__start
     # cBioPortal
-    server {
-        # Use 444 for internal SSL to allow streaming back to self (above)
-        listen 444 ssl;
-
-        server_name ${BENTOV2_CBIOPORTAL_DOMAIN};
-
-        ssl_certificate ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_CBIOPORTAL_FULLCHAIN_RELATIVE_PATH};
-        ssl_certificate_key ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_CBIOPORTAL_PRIVKEY_RELATIVE_PATH};
-
-        # Frame embedding: allow private portal to embed cBioPortal as an iframe:
-        add_header Content-Security-Policy "frame-ancestors 'self' https://${BENTOV2_PORTAL_DOMAIN};";
-
-        # Proxy pass to cBioPortal container
-        location / {
-            # Reverse proxy settings
-            include /gateway/conf/proxy.conf;
-            include /gateway/conf/proxy_cbioportal.conf;
-
-            # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
-            set $upstream_cbio http://${BENTO_CBIOPORTAL_CONTAINER_NAME}:${BENTO_CBIOPORTAL_INTERNAL_PORT};
-
-            proxy_pass $upstream_cbio;
-            error_log /var/log/bentov2_cbio_errors.log;
-        }
-    }
+    include /gateway/conf/cbioportal.conf;
     # tpl__use_cbioportal__end
 }
