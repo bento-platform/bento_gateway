@@ -105,24 +105,14 @@ http {
         ssl_reject_handshake on;
     }
 
+    # tpl__tls_yes__end
+
     # Bento Public
     map $http_origin $public_cors {
         default                          '';
         https://${BENTOV2_DOMAIN}        https://${BENTOV2_DOMAIN};
         https://${BENTOV2_PORTAL_DOMAIN} https://${BENTOV2_PORTAL_DOMAIN};
     }
-
-    # tpl__tls_yes__end
-
-    # tpl__tls_no__start
-    # Bento Public
-    map $http_origin $public_cors {
-        default                          '';
-        http://${BENTOV2_DOMAIN}        http://${BENTOV2_DOMAIN};
-        http://${BENTOV2_PORTAL_DOMAIN} http://${BENTOV2_PORTAL_DOMAIN};
-    }
-    # tpl__tls_no__end
-
     server {
         # tpl__tls_yes__start
         # Use 444 for internal SSL to allow streaming back to self (above)
