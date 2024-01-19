@@ -96,12 +96,12 @@ fi
 if [[ "${no_tls}" == 1 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to not use TLS"
   sed -i.bak \
-      '/tpl__tls_no__start/,/tpl__tls_no__end/d' \
+      '/tpl__tls_yes__start/,/tpl__tls_yes__end/d' \
       ./nginx.conf.pre
 else
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use TLS"
   sed -i.bak \
-      '/tpl__tls_yes__start/,/tpl__tls_yes__end/d' \
+      '/tpl__tls_no__start/,/tpl__tls_no__end/d' \
       ./nginx.conf.pre
 fi
 if [[ "$(true_values_to_1 $BENTOV2_USE_EXTERNAL_IDP)" == 1 ]]; then
