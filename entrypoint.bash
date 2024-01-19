@@ -59,7 +59,7 @@ echo "[bento_gateway] [entrypoint] writing NGINX configuration files"
 echo "[bento_gateway] [entrypoint] creating cbioportal.conf.pre"
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/cbioportal.conf.tpl \
-  > ./conf/cbioportal.conf.pre
+  > ./cbioportal.conf.pre
 
 CORS_PATH="${BENTO_GATEWAY_CONF_DIR}/cors.conf"
 echo "[bento_gateway] [entrypoint] creating ${CORS_PATH}"
