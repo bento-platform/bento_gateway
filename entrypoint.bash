@@ -52,9 +52,14 @@ for v in $(env | awk -F "=" '{print $1}' | grep "GATEWAY*"); do
   echo "\${${v}}" >> ./VARIABLES
 done
 
-# Process the main NGINX conf. template, using only the selected variables:
-#  - this avoids the ${DOLLAR}-type hack needed before
-echo "[bento_gateway] [entrypoint] writing main NGINX configuration"
+# Process the NGINX configuration templates, using only the selected variables:  ---------------------------------------
+
+echo "[bento_gateway] [entrypoint] writing NGINX configuration files"
+
+echo "[bento_gateway] [entrypoint] creating cbioportal.conf.pre"
+envsubst "$(cat ./VARIABLES)" \
+  < ./conf/cbioportal.conf.tpl \
+  > ./cbioportal.conf.pre
 
 CORS_PATH="${BENTO_GATEWAY_CONF_DIR}/cors.conf"
 echo "[bento_gateway] [entrypoint] creating ${CORS_PATH}"
@@ -67,7 +72,38 @@ envsubst "$(cat ./VARIABLES)" \
   < ./conf/nginx.conf.tpl \
   > ./nginx.conf.pre
 
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Run "fine-tuning", i.e., processing the configuration files to *remove* chunks that aren't relevant to the environment
+# variable settings for this instance. ---------------------------------------------------------------------------------
+
+no_tls="$(true_values_to_1 $BENTO_GATEWAY_NO_TLS)"
+
+# Run fine-tuning on cbioportal.conf.pre
+if [[ "${no_tls}" == 1 ]]; then
+  echo "[bento_gateway] [entrypoint] Fine-tuning cbioportal.conf to not use TLS"
+  sed -i.bak \
+      '/tpl__tls_yes__start/,/tpl__tls_yes__end/d' \
+      ./cbioportal.conf.pre
+else
+  echo "[bento_gateway] [entrypoint] Fine-tuning cbioportal.conf to use TLS"
+  sed -i.bak \
+      '/tpl__tls_no__start/,/tpl__tls_no__end/d' \
+      ./cbioportal.conf.pre
+fi
+
 # Run fine-tuning on nginx.conf.pre
+if [[ "${no_tls}" == 1 ]]; then
+  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to not use TLS"
+  sed -i.bak \
+      '/tpl__tls_yes__start/,/tpl__tls_yes__end/d' \
+      ./nginx.conf.pre
+else
+  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use TLS"
+  sed -i.bak \
+      '/tpl__tls_no__start/,/tpl__tls_no__end/d' \
+      ./nginx.conf.pre
+fi
 if [[ "$(true_values_to_1 $BENTOV2_USE_EXTERNAL_IDP)" == 1 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use an external IDP"
   sed -i.bak \
@@ -96,9 +132,16 @@ else
       ./nginx.conf.pre
 fi
 
-# Move nginx.conf into position
+# ----------------------------------------------------------------------------------------------------------------------
+
+# Generate final configuration files / locations -----------------------------------------------------------------------
+#  - Move cbioportal.conf into position
+cp ./cbioportal.conf.pre "${BENTO_GATEWAY_CONF_DIR}/cbioportal.conf"
+#  - Move nginx.conf into position
 cp ./nginx.conf.pre "${BENTO_GATEWAY_CONF_DIR}/nginx.conf"
-rm ./nginx.conf.pre*  # Remove pre-final file + any backups
+#  - Remove pre-final configuration files + any backups
+rm ./*.conf.pre*
+# ----------------------------------------------------------------------------------------------------------------------
 
 cat "${BENTO_GATEWAY_CONF_DIR}/nginx.conf"
 
