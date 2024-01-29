@@ -77,10 +77,10 @@ envsubst "$(cat ./VARIABLES)" \
 # Run "fine-tuning", i.e., processing the configuration files to *remove* chunks that aren't relevant to the environment
 # variable settings for this instance. ---------------------------------------------------------------------------------
 
-no_tls="$(true_values_to_1 $BENTO_GATEWAY_NO_TLS)"
+use_tls="$(true_values_to_1 $BENTO_GATEWAY_USE_TLS)"
 
 # Run fine-tuning on cbioportal.conf.pre
-if [[ "${no_tls}" == 1 ]]; then
+if [[ "${use_tls}" == 0 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning cbioportal.conf to not use TLS"
   sed -i.bak \
       '/tpl__tls_yes__start/,/tpl__tls_yes__end/d' \
@@ -93,7 +93,7 @@ else
 fi
 
 # Run fine-tuning on nginx.conf.pre
-if [[ "${no_tls}" == 1 ]]; then
+if [[ "${use_tls}" == 0 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to not use TLS"
   sed -i.bak \
       '/tpl__tls_yes__start/,/tpl__tls_yes__end/d' \
