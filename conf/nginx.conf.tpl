@@ -214,4 +214,9 @@ http {
     # cBioPortal
     include /gateway/conf/cbioportal.conf;
     # tpl__use_cbioportal__end
+
+    # tpl__redirect_yes__start
+    include /gateway/conf/redirect.conf;
+    # tpl__redirect_yes__end
+
 }
