@@ -92,7 +92,6 @@ else
       ./cbioportal.conf.pre
 fi
 
-
 # Run fine-tuning on nginx.conf.pre
 if [[ "${use_tls}" == 0 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to not use TLS"

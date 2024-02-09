@@ -224,7 +224,6 @@ http {
         # tpl__tls_yes__end
 
         # tpl__tls_no__start
-        # Use 81 for internal HTTP to allow streaming back to self (above)
         listen 80;
         # tpl__tls_no__end
 
