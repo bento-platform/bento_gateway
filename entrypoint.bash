@@ -68,7 +68,7 @@ envsubst "$(cat ./VARIABLES)" \
   > "${CORS_PATH}"
 
 echo "[bento_gateway] [entrypoint] creating redirect.conf.pre"
-envsubst "$(cat ./VARIABLE)" \
+envsubst "$(cat ./VARIABLES)" \
   < ./conf/redirect.conf.tpl \
   > ./redirect.conf.pre
 
