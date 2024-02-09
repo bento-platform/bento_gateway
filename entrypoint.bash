@@ -67,11 +67,6 @@ envsubst "$(cat ./VARIABLES)" \
   < ./conf/cors.conf.tpl \
   > "${CORS_PATH}"
 
-echo "[bento_gateway] [entrypoint] creating redirect.conf.pre"
-envsubst "$(cat ./VARIABLES)" \
-  < ./conf/redirect.conf.tpl \
-  > ./redirect.conf.pre
-
 echo "[bento_gateway] [entrypoint] creating nginx.conf.pre"
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/nginx.conf.tpl \
@@ -97,18 +92,6 @@ else
       ./cbioportal.conf.pre
 fi
 
-# Run fine-tuning on redirect.conf.pre
-if [[ "${use_tls}" == 0 ]]; then
-  echo "[bento_gateway] [entrypoint] Fine-tuning redirect.conf to not use TLS"
-  sed -i.bak \
-      '/tpl__tls_yes__start/,/tpl__tls_yes__end/d' \
-      ./redirect.conf.pre
-else
-  echo "[bento_gateway] [entrypoint] Fine-tuning redirect.conf to use TLS"
-  sed -i.bak \
-      '/tpl__tls_no__start/,/tpl__tls_no__end/d' \
-      ./redirect.conf.pre
-fi
 
 # Run fine-tuning on nginx.conf.pre
 if [[ "${use_tls}" == 0 ]]; then
@@ -163,8 +146,6 @@ fi
 # Generate final configuration files / locations -----------------------------------------------------------------------
 #  - Move cbioportal.conf into position
 cp ./cbioportal.conf.pre "${BENTO_GATEWAY_CONF_DIR}/cbioportal.conf"
-#  - Move redirect.conf into position
-cp ./redirect.conf.pre "${BENTO_GATEWAY_CONF_DIR}/redirect.conf"
 #  - Move nginx.conf into position
 cp ./nginx.conf.pre "${BENTO_GATEWAY_CONF_DIR}/nginx.conf"
 #  - Remove pre-final configuration files + any backups
