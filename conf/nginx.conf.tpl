@@ -216,7 +216,7 @@ http {
     # tpl__use_cbioportal__end
 
     # tpl__redirect_yes__start
-    # Redirect
+    # Redirect requests from an old domain (BENTO_DOMAIN_REDIRECT) to the current one (BENTOV2_DOMAIN).
     server {
         # tpl__tls_yes__start
         # Use 444 for internal SSL to allow streaming back to self (above)

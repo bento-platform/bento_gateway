@@ -131,7 +131,6 @@ else
       '/tpl__use_cbioportal__start/,/tpl__use_cbioportal__end/d' \
       ./nginx.conf.pre
 fi
-
 if [[ "$(true_values_to_1 $BENTO_USE_DOMAIN_REDIRECT)" == 1 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use domain redirect"
 else
