@@ -117,10 +117,21 @@ http {
 
         location / {
             # Reverse proxy settings
-            include     /gateway/conf/proxy.conf;
+            limit_req zone=perip burst=30;
+            limit_req zone=perserver burst=90;
 
-            # Override a line from the above conf - we need Keycloak to be explicitly X-Forwarded-Proto https
-            proxy_set_header X-Forwarded-Proto https;
+            proxy_pass_header       Server;
+            proxy_http_version      1.1;
+            proxy_set_header        Upgrade             $http_upgrade;
+            proxy_set_header        Connection          $connection_upgrade;
+            proxy_set_header        Host                $http_host;
+            proxy_set_header        X-Real-IP           $remote_addr;
+            proxy_set_header        X-Forwarded-Proto   https;  # explicitly set to https
+            proxy_set_header        X-Forwarded-Host    $host;
+            proxy_set_header        X-Forwarded-Port    $server_port;
+            proxy_set_header        X-Forwarded-For     $proxy_add_x_forwarded_for;
+
+            proxy_ignore_client_abort   on;
 
             # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
             set         $upstream_auth http://${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT_PLAIN_HTTP};
