@@ -109,7 +109,8 @@ http {
 
     # tpl__tls_no__start
     # tpl__internal_idp__start
-    # Keycloak
+    # Keycloak for no-TLS setups; in this case, the TLS connection is terminated before traffic gets to the gateway, so
+    # we have to proxy_pass here instead of streaming traffic above.
     server {
         listen      80;
         server_name ${BENTOV2_AUTH_DOMAIN};
