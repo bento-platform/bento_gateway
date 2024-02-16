@@ -120,7 +120,7 @@ http {
             include     /gateway/conf/proxy.conf;
 
             # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
-            set         $upstream_auth http://${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
+            set         $upstream_auth http://${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT_PLAIN_HTTP};
             proxy_pass  $upstream_auth;
 
             error_log   /var/log/bentov2_auth_errors.log;
