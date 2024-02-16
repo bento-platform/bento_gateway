@@ -118,7 +118,7 @@ http {
             # Reverse proxy settings
             include     /gateway/conf/proxy.conf;
 
-            set         $upstream_auth ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
+            set         $upstream_auth http://${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
             proxy_pass  $upstream_auth;
 
             error_log   /var/log/bentov2_auth_errors.log;
