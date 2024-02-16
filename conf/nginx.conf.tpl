@@ -119,6 +119,9 @@ http {
             # Reverse proxy settings
             include     /gateway/conf/proxy.conf;
 
+            # Override a line from the above conf - we need Keycloak to be explicitly X-Forwarded-Proto https
+            proxy_set_header X-Forwarded-Proto https;
+
             # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
             set         $upstream_auth http://${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT_PLAIN_HTTP};
             proxy_pass  $upstream_auth;
