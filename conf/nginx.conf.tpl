@@ -107,23 +107,23 @@ http {
 
     # tpl__tls_yes__end
 
-    # tpls__tls_no__start
+    # tpl__tls_no__start
     # tpl__internal_idp__start
     # Keycloak
     server {
-        listen 80;
+        listen      80;
         server_name ${BENTOV2_AUTH_DOMAIN};
 
         # Reverse proxy settings
-        include /gateway/conf/proxy.conf;
+        include     /gateway/conf/proxy.conf;
 
-        set $upstream_auth ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
+        set         $upstream_auth ${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
         proxy_pass  $upstream_auth;
 
-        error_log /var/log/bentov2_auth_errors.log;
+        error_log   /var/log/bentov2_auth_errors.log;
     }
     # tpl__internal_idp__end
-    # tpls__tls_no__end
+    # tpl__tls_no__end
 
     # Bento Public
     map $http_origin $public_cors {
