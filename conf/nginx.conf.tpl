@@ -107,6 +107,28 @@ http {
 
     # tpl__tls_yes__end
 
+    # tpl__tls_no__start
+    # tpl__internal_idp__start
+    # Keycloak for no-TLS setups; in this case, the TLS connection is terminated before traffic gets to the gateway, so
+    # we have to proxy_pass here instead of streaming traffic above.
+    server {
+        listen      80;
+        server_name ${BENTOV2_AUTH_DOMAIN};
+
+        location / {
+            # Reverse proxy settings
+            include     /gateway/conf/proxy.conf;
+
+            # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
+            set         $upstream_auth http://${BENTOV2_AUTH_CONTAINER_NAME}:${BENTOV2_AUTH_INTERNAL_PORT};
+            proxy_pass  $upstream_auth;
+
+            error_log   /var/log/bentov2_auth_errors.log;
+        }
+    }
+    # tpl__internal_idp__end
+    # tpl__tls_no__end
+
     # Bento Public
     map $http_origin $public_cors {
         default                          '';
