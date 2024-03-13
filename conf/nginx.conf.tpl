@@ -58,7 +58,7 @@ http {
                              '"$request" $status $body_bytes_sent '
                              '"$http_referer" "$http_user_agent"'
                              'rt=$request_time uct="$upstream_connect_time" uht="$upstream_header_time" urt="$upstream_response_time"';
-    access_log stderr upstream_time;
+    access_log logs/access.log upstream_time;
 
     # Set up per-server and per-address rate limiter
     limit_req_zone $binary_remote_addr zone=perip:10m rate=10r/s;
