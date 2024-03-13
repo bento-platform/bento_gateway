@@ -39,6 +39,12 @@ stream {
         ssl_preread on;
         proxy_pass  $name;
     }
+
+    log_format basic '$remote_addr [$time_local] '
+                 '$protocol $status $bytes_sent $bytes_received '
+                 '$session_time "$upstream_addr" '
+                 '"$upstream_bytes_sent" "$upstream_bytes_received" "$upstream_connect_time"';
+    access_log logs/access.log basic;
 }
 # tpl__tls_yes__end
 
