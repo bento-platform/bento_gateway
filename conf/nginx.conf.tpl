@@ -52,7 +52,7 @@ http {
     # Set up log format
     log_format compression '$remote_addr - $remote_user [$time_local] '
                            '"$request" $status $body_bytes_sent '
-                           '"$http_referer" "$http_user_agent" "$gzip_ratio" "$uri"';
+                           '"$http_referer" "$http_user_agent" "$gzip_ratio" "$uri" request_time=$request_time upstream_response_time=$upstream_response_time upstream_connect_time=$upstream_connect_time upstream_header_time=$upstream_header_time';
 
     # Set up per-server and per-address rate limiter
     limit_req_zone $binary_remote_addr zone=perip:10m rate=10r/s;
