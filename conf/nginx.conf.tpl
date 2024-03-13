@@ -1,4 +1,4 @@
-worker_processes 1;
+worker_processes 2;
 
 # expose env vars to lua code
 env BENTO_DEBUG;
