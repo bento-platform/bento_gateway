@@ -51,6 +51,7 @@ local uri = ngx.var.uri  -- post-rewrite URI
 
 if req_method == "GET" and (
   uri == "/service-info" or
+  req_uri == "/api/metadata/api/projects" or
   req_uri == "/api/metadata/api/public" or
   req_uri == "/api/metadata/api/public_overview" or
   req_uri == "/api/metadata/api/public_search_fields" or
