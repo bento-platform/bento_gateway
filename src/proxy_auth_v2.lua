@@ -57,7 +57,7 @@ local uri = ngx.var.uri  -- post-rewrite URI
 -- TODO: replace this with properly authorization-compatible services
 
 if req_method == "GET" and (
-  uri == "/service-info" or
+  uri == "/service-info" or  -- any service-info endpoint; rewritten from original /api/.../service-info
   req_uri_no_qp == "/api/metadata/api/projects" or
   req_uri_no_qp == "/api/metadata/api/public" or
   req_uri_no_qp == "/api/metadata/api/public_overview" or
