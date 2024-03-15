@@ -41,7 +41,13 @@ end
 
 local req = ngx.req
 local req_method = req.get_method()
-local req_uri = ngx.var.request_uri  -- pre-rewrite URI
+
+local req_uri_no_qp = ngx.var.request_uri  -- pre-rewrite URI
+local qp = req_uri_no_qp:find("?")
+if qp ~= nil then
+  req_uri_no_qp = req_uri_no_qp:sub(1, qp - 1)
+end
+
 local uri = ngx.var.uri  -- post-rewrite URI
 
 -- BEGIN OPEN ENDPOINT LOGIC ------------------------------------------------------------
@@ -51,11 +57,11 @@ local uri = ngx.var.uri  -- post-rewrite URI
 
 if req_method == "GET" and (
   uri == "/service-info" or
-  req_uri == "/api/metadata/api/projects" or
-  req_uri == "/api/metadata/api/public" or
-  req_uri == "/api/metadata/api/public_overview" or
-  req_uri == "/api/metadata/api/public_search_fields" or
-  req_uri == "/api/metadata/api/public_dataset"
+  req_uri_no_qp == "/api/metadata/api/projects" or
+  req_uri_no_qp == "/api/metadata/api/public" or
+  req_uri_no_qp == "/api/metadata/api/public_overview" or
+  req_uri_no_qp == "/api/metadata/api/public_search_fields" or
+  req_uri_no_qp == "/api/metadata/api/public_dataset"
 ) then
   goto script_end
 end
