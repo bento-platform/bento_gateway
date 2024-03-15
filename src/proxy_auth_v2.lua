@@ -43,6 +43,7 @@ local req = ngx.req
 local req_method = req.get_method()
 
 local req_uri_no_qp = ngx.var.request_uri  -- pre-rewrite URI
+-- remove query parameters if we have any:
 local qp = req_uri_no_qp:find("?")
 if qp ~= nil then
   req_uri_no_qp = req_uri_no_qp:sub(1, qp - 1)
