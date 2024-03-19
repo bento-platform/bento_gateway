@@ -39,6 +39,36 @@ local err_500_and_log = function(detail, err)
 end
 -- END FUNCTION DEFINITIONS -----–-----–-----–-----–-----–-----–-----–-----–-----–-------
 
+local req = ngx.req
+local req_method = req.get_method()
+
+local req_uri_no_qp = ngx.var.request_uri  -- pre-rewrite URI
+-- remove query parameters if we have any:
+local qp = req_uri_no_qp:find("?")
+if qp ~= nil then
+  req_uri_no_qp = req_uri_no_qp:sub(1, qp - 1)
+end
+
+local uri = ngx.var.uri  -- post-rewrite URI
+
+-- BEGIN OPEN ENDPOINT LOGIC ------------------------------------------------------------
+
+-- Pass through all endpoint calls which used to be proxied by bento_public
+-- TODO: replace this with properly authorization-compatible services
+
+if req_method == "GET" and (
+  uri == "/service-info" or  -- any service-info endpoint; rewritten from original /api/.../service-info
+  req_uri_no_qp == "/api/metadata/api/projects" or
+  req_uri_no_qp == "/api/metadata/api/public" or
+  req_uri_no_qp == "/api/metadata/api/public_overview" or
+  req_uri_no_qp == "/api/metadata/api/public_search_fields" or
+  req_uri_no_qp == "/api/metadata/api/public_dataset"
+) then
+  goto script_end
+end
+
+-- END OPEN ENDPOINT LOGIC --------------------------------------------------------------
+
 -- BEGIN AUTHORIZATION LOGIC ------------------------------------------------------------
 
 local bento_debug = os.getenv("BENTO_DEBUG")
@@ -54,11 +84,10 @@ local user_role
 
 -- Check bearer token if set
 -- Adapted from https://github.com/zmartzone/lua-resty-openidc/issues/266#issuecomment-542771402
-local req = ngx.req
 local auth_header = req.get_headers()["Authorization"]
 
 -- Tokens can also be passed in the form of POST body form data
-if req.get_method() == "POST" then
+if req_method == "POST" then
   req.read_body()
   local req_body = req.get_post_args()
   if req_body ~= nil and req_body["token"] then
