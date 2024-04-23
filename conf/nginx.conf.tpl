@@ -1,4 +1,4 @@
-worker_processes 1;
+worker_processes 2;
 pcre_jit on;
 
 # expose env vars to lua code
