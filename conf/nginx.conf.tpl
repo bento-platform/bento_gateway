@@ -8,6 +8,7 @@ error_log stderr info;
 
 events {
     worker_connections 1024;
+    multi_accept on;
 }
 
 # tpl__tls_yes__start
