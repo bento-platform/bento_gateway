@@ -1,4 +1,4 @@
-worker_processes 2;
+worker_processes 4;
 pcre_jit on;
 
 # expose env vars to lua code
@@ -9,7 +9,6 @@ error_log stderr info;
 
 events {
     worker_connections 1024;
-    multi_accept on;
 }
 
 # tpl__tls_yes__start
