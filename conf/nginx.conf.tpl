@@ -51,6 +51,9 @@ http {
     # Allow SNI-based proxying
     proxy_ssl_server_name on;
 
+    # Allow sendfile() for sending small files directly
+    sendfile on;
+
     # Set up log format
     log_format compression '$remote_addr - $remote_user [$time_local] '
                            '"$request" $status $body_bytes_sent '
