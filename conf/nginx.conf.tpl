@@ -1,4 +1,5 @@
-worker_processes 1;
+worker_processes 2;
+pcre_jit on;
 
 # expose env vars to lua code
 env BENTO_DEBUG;
@@ -7,7 +8,8 @@ env BENTO_AUTHZ_SERVICE_URL;
 error_log stderr info;
 
 events {
-    worker_connections 1024;
+    worker_connections 2048;
+    use epoll;  # Should be default on Linux, but explicitly use it
 }
 
 # tpl__tls_yes__start
@@ -48,6 +50,9 @@ http {
 
     # Allow SNI-based proxying
     proxy_ssl_server_name on;
+
+    # Allow sendfile() for sending small files directly
+    sendfile on;
 
     # Set up log format
     log_format compression '$remote_addr - $remote_user [$time_local] '
