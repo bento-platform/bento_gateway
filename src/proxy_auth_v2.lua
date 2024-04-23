@@ -58,6 +58,8 @@ local uri = ngx.var.uri  -- post-rewrite URI
 
 if req_method == "GET" and (
   uri == "/service-info" or  -- any service-info endpoint; rewritten from original /api/.../service-info
+  uri == "/workflows" or  -- any workflow-providing endpoint; rewritten from original /api/.../workflows
+  uri:sub(1, 11) == "/workflows/" or  -- "
   req_uri_no_qp == "/api/metadata/api/projects" or
   req_uri_no_qp == "/api/metadata/api/public" or
   req_uri_no_qp == "/api/metadata/api/public_overview" or
