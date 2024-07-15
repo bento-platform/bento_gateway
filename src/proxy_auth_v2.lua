@@ -64,7 +64,8 @@ if req_method == "GET" and (
   req_uri_no_qp == "/api/metadata/api/public" or
   req_uri_no_qp == "/api/metadata/api/public_overview" or
   req_uri_no_qp == "/api/metadata/api/public_search_fields" or
-  req_uri_no_qp == "/api/metadata/api/public_dataset"
+  req_uri_no_qp == "/api/metadata/api/public_dataset" or
+  req_uri_no_qp == "/api/metadata/api/public_rules"
 ) then
   goto script_end
 end
