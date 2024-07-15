@@ -1,4 +1,4 @@
-FROM openresty/openresty:1.25.3.1-4-alpine-fat
+FROM openresty/openresty:1.25.3.1-5-alpine-fat
 
 # Install apt and lua dependencies
 RUN apk add --no-cache git bash python3 && \
@@ -10,9 +10,9 @@ RUN mkdir -p /usr/local/openresty/nginx/conf/bento_services && \
     mkdir -p /usr/local/openresty/nginx/conf/bento_public_services && \
     mkdir -p /gateway/services && \
     mkdir -p /gateway/public_services
-COPY LICENSE LICENSE
 COPY conf conf
 COPY src src
-COPY entrypoint.bash entrypoint.bash
+COPY entrypoint.bash .
+COPY LICENSE .
 
 ENTRYPOINT ["bash", "./entrypoint.bash"]
