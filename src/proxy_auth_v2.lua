@@ -67,6 +67,11 @@ if req_method == "GET" and (
   req_uri_no_qp == "/api/metadata/api/public_dataset" or
   req_uri_no_qp == "/api/metadata/api/public_rules"
 ) then
+  -- Clear possible Katsu authorization injections for old remote user middleware
+  ngx.req.clear_header("X-User")
+  ngx.req.clear_header("X-User-Role")
+  ngx.req.clear_header("X-Authorization")
+
   goto script_end
 end
 
