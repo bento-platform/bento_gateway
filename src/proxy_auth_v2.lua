@@ -67,7 +67,9 @@ if (req_method == "GET" or req_method == "OPTIONS") and (
   req_uri_no_qp == "/api/metadata/api/public_dataset" or
   req_uri_no_qp == "/api/metadata/api/public_rules" or
   req_uri_no_qp == "/api/metadata/api/extra_properties_schema_types" or
-  req_uri_no_qp:sub(1, 26) == "/api/metadata/api/schemas/"
+  req_uri_no_qp:sub(1, 26) == "/api/metadata/api/schemas/" or
+  req_uri_no_qp:sub(1, 24) == "/api/metadata/data-types" or
+  req_uri_no_qp:sub(1, 24) == "/api/gohan/data-types"
 ) then
   -- Clear possible Katsu authorization injections for old remote user middleware
   ngx.req.clear_header("X-User")
