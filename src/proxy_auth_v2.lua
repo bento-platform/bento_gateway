@@ -56,7 +56,7 @@ local uri = ngx.var.uri  -- post-rewrite URI
 -- Pass through all endpoint calls which used to be proxied by bento_public
 -- TODO: replace this with properly authorization-compatible services
 
-if req_method == "GET" and (
+if (req_method == "GET" or req_method == "OPTIONS") and (
   uri == "/service-info" or  -- any service-info endpoint; rewritten from original /api/.../service-info
   uri == "/workflows" or  -- any workflow-providing endpoint; rewritten from original /api/.../workflows
   uri:sub(1, 11) == "/workflows/" or  -- "
