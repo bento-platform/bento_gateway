@@ -82,11 +82,12 @@ http {
         ''      close;
     }
 
-    # tpl__tls_yes__start
 
     # Configure Lua HTTPS verification
     lua_ssl_verify_depth        2;
     lua_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+
+    # tpl__tls_yes__start
 
     # Redirect all http to https
     server {
