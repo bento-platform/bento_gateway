@@ -266,4 +266,8 @@ http {
     }
     # tpl__redirect_yes__end
 
+    # tpl__use_minio__start
+    include minio.conf;
+    # tpl__use_minio__end
+
 }

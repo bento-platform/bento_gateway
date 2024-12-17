@@ -72,6 +72,10 @@ envsubst "$(cat ./VARIABLES)" \
   < ./conf/nginx.conf.tpl \
   > ./nginx.conf.pre
 
+echo "[bento_gateway] [entrypoint] creating minio.conf.pre"
+envsubst "$(cat ./VARIABLES)" \
+  < ./conf/minio.conf.tpl \
+  > ./minio.conf.pre
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Run "fine-tuning", i.e., processing the configuration files to *remove* chunks that aren't relevant to the environment
@@ -90,6 +94,19 @@ else
   sed -i.bak \
       '/tpl__tls_no__start/,/tpl__tls_no__end/d' \
       ./cbioportal.conf.pre
+fi
+
+# Run fine-tuning on minio.conf.pre
+if [[ "${use_tls}" == 0 ]]; then
+  echo "[bento_gateway] [entrypoint] Fine-tuning minio.conf to not use TLS"
+  sed -i.bak \
+      '/tpl__tls_yes__start/,/tpl__tls_yes__end/d' \
+      ./minio.conf.pre
+else
+  echo "[bento_gateway] [entrypoint] Fine-tuning minio.conf to use TLS"
+  sed -i.bak \
+      '/tpl__tls_no__start/,/tpl__tls_no__end/d' \
+      ./minio.conf.pre
 fi
 
 # Run fine-tuning on nginx.conf.pre
@@ -139,11 +156,21 @@ else
       '/tpl__redirect_yes__start/,/tpl__redirect_yes__end/d' \
       ./nginx.conf.pre
 fi
+if [[ "$(true_values_to_1 $BENTO_MINIO_ENABLED)" == 1]]; then
+  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use Minio"
+else
+  echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to disable Minio"
+  sed -i.bak \
+      '/tpl__use_minio__start/,/tpl__use_minio__end/d' \
+      ./nginx.conf.pre
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Generate final configuration files / locations -----------------------------------------------------------------------
 #  - Move cbioportal.conf into position
 cp ./cbioportal.conf.pre "${BENTO_GATEWAY_CONF_DIR}/cbioportal.conf"
+#  - Move minio.conf into position
+cp ./minio.conf.pre "${BENTO_GATEWAY_CONF_DIR}/minio.conf"
 #  - Move nginx.conf into position
 cp ./nginx.conf.pre "${BENTO_GATEWAY_CONF_DIR}/nginx.conf"
 #  - Remove pre-final configuration files + any backups
