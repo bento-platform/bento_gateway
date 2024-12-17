@@ -34,7 +34,7 @@ server {
         proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
-        proxy_pass https://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_INTERNAL_PORT};
+        proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_INTERNAL_PORT};
 
         # Errors
         error_log /var/log/bentov2_minio_errors.log;
@@ -60,7 +60,7 @@ server {
 
         rewrite ^ $request_uri;
         rewrite ^/minio/ui/(.*) /$1 break;
-        proxy_pass https://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_CONSOLE_PORT}$uri;
+        proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_CONSOLE_PORT}$uri;
 
         # Add sub_filter directives to rewrite base href
         sub_filter '<base href="/"' '<base href="/minio/ui/"';
