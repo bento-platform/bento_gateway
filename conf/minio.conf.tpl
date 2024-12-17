@@ -1,14 +1,5 @@
-upstream minio {
-    server ${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_INTERNAL_PORT};
-}
-
-upstream minio_console {
-    server ${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_CONSOLE_PORT};
-}
-
 server {
     # tpl__tls_yes__start
-    # Use 444 for internal SSL to allow streaming back to self (above)
     listen 444 ssl;
     # tpl__tls_yes__end
 
@@ -46,7 +37,7 @@ server {
         proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
-        proxy_pass http://minio;
+        proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_INTERNAL_PORT};
     }
 
     location /minio/ui/ {
@@ -72,6 +63,6 @@ server {
 
         chunked_transfer_encoding off;
 
-        proxy_pass http://minio_console; # This uses the upstream directive definition to load balance
+        proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_CONSOLE_PORT};
    }
 }
