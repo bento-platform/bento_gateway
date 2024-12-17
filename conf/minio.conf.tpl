@@ -31,7 +31,6 @@ server {
         include /gateway/conf/proxy_extra.conf;
         proxy_connect_timeout 300;
         # Default is HTTP/1, keepalive is only enabled in HTTP/1.1
-        proxy_http_version 1.1;
         proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
