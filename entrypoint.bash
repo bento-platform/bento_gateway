@@ -156,7 +156,7 @@ else
       '/tpl__redirect_yes__start/,/tpl__redirect_yes__end/d' \
       ./nginx.conf.pre
 fi
-if [[ "$(true_values_to_1 $BENTO_MINIO_ENABLED)" == 1]]; then
+if [[ "$(true_values_to_1 $BENTO_MINIO_ENABLED)" == 1 ]]; then
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to use Minio"
 else
   echo "[bento_gateway] [entrypoint] Fine-tuning nginx.conf to disable Minio"
