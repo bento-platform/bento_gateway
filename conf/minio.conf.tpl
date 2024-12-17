@@ -26,23 +26,22 @@ server {
     proxy_request_buffering off;
 
     location / {
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
+        # Reverse proxy settings
+        include /gateway/conf/proxy.conf;
+        include /gateway/conf/proxy_extra.conf;
         proxy_connect_timeout 300;
         # Default is HTTP/1, keepalive is only enabled in HTTP/1.1
         proxy_http_version 1.1;
         proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
-        proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_INTERNAL_PORT};
+        proxy_pass https://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_INTERNAL_PORT};
 
         # Errors
         error_log /var/log/bentov2_minio_errors.log;
     }
 
+    location /minio/ui { return 302  https://${BENTOV2_DOMAIN}/minio/ui/; }
     location /minio/ui/ {
         # General reverse proxy settings
         include /gateway/conf/proxy.conf;
@@ -62,7 +61,7 @@ server {
 
         rewrite ^ $request_uri;
         rewrite ^/minio/ui/(.*) /$1 break;
-        proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_CONSOLE_PORT}$uri;
+        proxy_pass https://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_CONSOLE_PORT}$uri;
 
         # Add sub_filter directives to rewrite base href
         sub_filter '<base href="/"' '<base href="/minio/ui/"';
