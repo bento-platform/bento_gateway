@@ -18,6 +18,11 @@ server {
 
     server_name ${BENTO_MINIO_DOMAIN};
 
+    # tpl__tls_yes__start
+    ssl_certificate ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTO_GATEWAY_INTERNAL_MINIO_FULLCHAIN_RELATIVE_PATH};
+    ssl_certificate_key ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTO_GATEWAY_INTERNAL_MINIO_PRIVKEY_RELATIVE_PATH};
+    # tpl__tls_yes__end
+
     # Allow special characters in headers
     ignore_invalid_headers off;
     
