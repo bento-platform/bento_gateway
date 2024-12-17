@@ -38,31 +38,40 @@ server {
         chunked_transfer_encoding off;
 
         proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_INTERNAL_PORT};
+
+        # Errors
+        error_log /var/log/bentov2_minio_errors.log;
     }
 
     location /minio/ui/ {
-        rewrite ^/minio/ui/(.*) /$1 break;
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-NginX-Proxy true;
+        # General reverse proxy settings
+        include /gateway/conf/proxy.conf;
+        include /gateway/conf/proxy_extra.conf;
 
         # This is necessary to pass the correct IP to be hashed
+        proxy_set_header X-NginX-Proxy true;
         real_ip_header X-Real-IP;
 
         proxy_connect_timeout 300;
 
-        # To support websockets in MinIO versions released after January 2023
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
         # Some environments may encounter CORS errors (Kubernetes + Nginx Ingress)
         # Uncomment the following line to set the Origin request to an empty string
-        # proxy_set_header Origin '';
+        proxy_set_header Origin '';
 
         chunked_transfer_encoding off;
 
-        proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_CONSOLE_PORT};
+        rewrite ^ $request_uri;
+        rewrite ^/minio/ui/(.*) /$1 break;
+        proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_CONSOLE_PORT}$uri;
+
+        # Add sub_filter directives to rewrite base href
+        sub_filter '<base href="/"' '<base href="/minio/ui/"';
+        sub_filter_once on;
+
+        # Ensure sub_filter module is enabled
+        proxy_set_header Accept-Encoding "";    
+
+        # Errors
+        error_log /var/log/bentov2_minio_errors.log;
    }
 }
