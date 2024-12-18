@@ -40,7 +40,7 @@ server {
         error_log /var/log/bentov2_minio_errors.log;
     }
 
-    location /minio/ui { return 302  https://${BENTOV2_DOMAIN}/minio/ui/; }
+    location /minio/ui { return 302  https://${BENTO_MINIO_DOMAIN}/minio/ui/; }
     location /minio/ui/ {
         # General reverse proxy settings
         include /gateway/conf/proxy.conf;
@@ -61,13 +61,6 @@ server {
         rewrite ^ $request_uri;
         rewrite ^/minio/ui/(.*) /$1 break;
         proxy_pass http://${BENTO_MINIO_CONTAINER_NAME}:${BENTO_MINIO_CONSOLE_PORT}$uri;
-
-        # Add sub_filter directives to rewrite base href
-        sub_filter '<base href="/"' '<base href="/minio/ui/"';
-        sub_filter_once on;
-
-        # Ensure sub_filter module is enabled
-        proxy_set_header Accept-Encoding "";    
 
         # Errors
         error_log /var/log/bentov2_minio_errors.log;
