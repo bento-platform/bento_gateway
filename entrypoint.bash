@@ -76,6 +76,7 @@ echo "[bento_gateway] [entrypoint] creating minio.conf.pre"
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/minio.conf.tpl \
   > ./minio.conf.pre
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Run "fine-tuning", i.e., processing the configuration files to *remove* chunks that aren't relevant to the environment
