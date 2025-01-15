@@ -60,16 +60,7 @@ if (req_method == "GET" or req_method == "OPTIONS") and (
   uri == "/service-info" or  -- any service-info endpoint; rewritten from original /api/.../service-info
   uri == "/workflows" or  -- any workflow-providing endpoint; rewritten from original /api/.../workflows
   uri:sub(1, 11) == "/workflows/" or  -- "
-  req_uri_no_qp:sub(1, 26) == "/api/metadata/api/projects" or
-  req_uri_no_qp:sub(1, 26) == "/api/metadata/api/datasets" or
-  req_uri_no_qp == "/api/metadata/api/public" or
-  req_uri_no_qp == "/api/metadata/api/public_overview" or
-  req_uri_no_qp == "/api/metadata/api/public_search_fields" or
-  req_uri_no_qp == "/api/metadata/api/public_rules" or
-  req_uri_no_qp == "/api/metadata/api/extra_properties_schema_types" or
-  req_uri_no_qp:sub(1, 26) == "/api/metadata/api/schemas/" or
-  req_uri_no_qp:sub(1, 24) == "/api/metadata/data-types" or
-  req_uri_no_qp:sub(1, 24) == "/api/gohan/data-types"
+  req_uri_no_qp:sub(1, 21) == "/api/gohan/data-types"
 ) then
   -- Clear possible Katsu authorization injections for old remote user middleware
   ngx.req.clear_header("X-User")
