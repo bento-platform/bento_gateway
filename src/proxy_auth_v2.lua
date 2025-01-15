@@ -60,7 +60,7 @@ if (req_method == "GET" or req_method == "OPTIONS") and (
   uri == "/service-info" or  -- any service-info endpoint; rewritten from original /api/.../service-info
   uri == "/workflows" or  -- any workflow-providing endpoint; rewritten from original /api/.../workflows
   uri:sub(1, 11) == "/workflows/" or  -- "
-  req_uri_no_qp:sub(1, 24) == "/api/gohan/data-types"
+  req_uri_no_qp:sub(1, 21) == "/api/gohan/data-types"
 ) then
   -- Clear possible Katsu authorization injections for old remote user middleware
   ngx.req.clear_header("X-User")
