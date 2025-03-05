@@ -28,7 +28,7 @@ server {
     location / {
         # Reverse proxy settings
         include /gateway/conf/proxy.conf;
-        include /gateway/conf/proxy_extra.conf;
+        include /gateway/conf/proxy_timeouts.conf;
         proxy_connect_timeout 300;
         # Default is HTTP/1, keepalive is only enabled in HTTP/1.1
         proxy_set_header Connection "";
@@ -44,7 +44,7 @@ server {
     location /minio/ui/ {
         # General reverse proxy settings
         include /gateway/conf/proxy.conf;
-        include /gateway/conf/proxy_extra.conf;
+        include /gateway/conf/proxy_timeouts.conf;
 
         # This is necessary to pass the correct IP to be hashed
         proxy_set_header X-NginX-Proxy true;
