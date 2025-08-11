@@ -1,4 +1,4 @@
-FROM openresty/openresty:1.27.1.2-0-alpine-fat
+FROM openresty/openresty:1.27.1.2-3-alpine-fat
 
 # Install apt and lua dependencies
 RUN apk add --no-cache git bash python3 && \
