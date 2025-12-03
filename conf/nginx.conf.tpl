@@ -266,8 +266,8 @@ http {
     }
     # tpl__redirect_yes__end
 
-    # tpl__use_minio__start
-    include minio.conf;
-    # tpl__use_minio__end
+    # tpl__use_garage__start
+    include garage.conf;
+    # tpl__use_garage__end
 
 }
