@@ -1,4 +1,4 @@
-# Main S3 API endpoint (path-style and virtual-hosted-style buckets)
+# Main S3 API endpoint (path-style buckets)
 server {
     # tpl__tls_yes__start
     listen 444 ssl;
@@ -8,7 +8,7 @@ server {
     listen 80;
     # tpl__tls_no__end
 
-    server_name ${BENTO_GARAGE_DOMAIN} *.s3.${BENTO_GARAGE_DOMAIN};
+    server_name ${BENTO_GARAGE_DOMAIN};
 
     # tpl__tls_yes__start
     ssl_certificate ${BENTOV2_GATEWAY_INTERNAL_CERTS_DIR}${BENTOV2_GATEWAY_INTERNAL_FULLCHAIN_RELATIVE_PATH};
