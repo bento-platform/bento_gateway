@@ -29,7 +29,6 @@ server {
         proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
-        # Direct backend instead of upstream garage_s3
         proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_S3_API_PORT};
 
         proxy_set_header Host $host;
@@ -69,7 +68,6 @@ server {
         proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
-        # Direct backend instead of upstream garage_s3
         proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_ADMIN_PORT};
 
         proxy_set_header Host $host;
