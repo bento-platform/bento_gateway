@@ -26,7 +26,7 @@ server {
         include /gateway/conf/proxy_timeouts.conf;
 
         proxy_connect_timeout 300;
-        proxy_set_header Connection "";
+        #proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
         proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_S3_API_PORT};
@@ -65,7 +65,7 @@ server {
         include /gateway/conf/proxy_timeouts.conf;
 
         proxy_connect_timeout 300;
-        proxy_set_header Connection "";
+        #proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
         proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_ADMIN_PORT};
