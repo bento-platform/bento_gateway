@@ -28,11 +28,10 @@ server {
         proxy_connect_timeout 300;
         #proxy_set_header Connection "";
         chunked_transfer_encoding off;
-
+        
+        proxy_set_header Host $http_host;
         proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_S3_API_PORT};
-
-        proxy_set_header Host $host;
-
+        proxy_max_temp_file_size 0;
         error_log /var/log/bentov2_garage_errors.log;
     }
 }
@@ -68,10 +67,9 @@ server {
         #proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
+        proxy_set_header Host $http_host;
         proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_ADMIN_PORT};
-
-        proxy_set_header Host $host;
-
+        proxy_max_temp_file_size 0;
         error_log /var/log/bentov2_garage_errors.log;
     }
 }
