@@ -31,8 +31,6 @@ server {
 
         proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_S3_API_PORT};
 
-        proxy_set_header Host $host;
-
         error_log /var/log/bentov2_garage_errors.log;
     }
 }
@@ -69,8 +67,6 @@ server {
         chunked_transfer_encoding off;
 
         proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_ADMIN_PORT};
-
-        proxy_set_header Host $host;
 
         error_log /var/log/bentov2_garage_errors.log;
     }
