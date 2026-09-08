@@ -170,6 +170,7 @@ http {
         location / {
             # Reverse proxy settings
             include /gateway/conf/proxy.conf;
+            include /gateway/conf/proxy_large_headers.conf;
 
             # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
             set         $upstream_public http://${BENTO_PUBLIC_CONTAINER_NAME}:${BENTO_PUBLIC_INTERNAL_PORT};
