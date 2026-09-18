@@ -29,7 +29,10 @@ server {
         proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
-        proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_S3_API_PORT};
+        # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
+        set $upstream_garage http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_S3_API_PORT};
+
+        proxy_pass $upstream_garage;
 
         error_log /var/log/bentov2_garage_errors.log;
     }
@@ -66,7 +69,10 @@ server {
         proxy_set_header Connection "";
         chunked_transfer_encoding off;
 
-        proxy_pass http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_ADMIN_PORT};
+        # Immediate set/re-use means we don't get resolve errors if not up (as opposed to passing as a literal)
+        set $upstream_garage http://${BENTO_GARAGE_CONTAINER_NAME}:${BENTO_GARAGE_ADMIN_PORT};
+
+        proxy_pass $upstream_garage;
 
         error_log /var/log/bentov2_garage_errors.log;
     }
