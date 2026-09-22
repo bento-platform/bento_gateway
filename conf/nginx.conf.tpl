@@ -145,6 +145,7 @@ http {
         # tpl__tls_yes__start
         # Use 444 for internal SSL to allow streaming back to self (above)
         listen 444 ssl;
+        http2 on;
         # tpl__tls_yes__end
 
         # tpl__tls_no__start
@@ -194,6 +195,7 @@ http {
         # tpl__tls_yes__start
         # Use 444 for internal SSL to allow streaming back to self (above)
         listen 444 ssl;
+        http2 on;
         # tpl__tls_yes__end
 
         # tpl__tls_no__start
@@ -250,6 +252,7 @@ http {
         # tpl__tls_yes__start
         # Use 444 for internal SSL to allow streaming back to self (above)
         listen 444 ssl;
+        http2 on;
         # tpl__tls_yes__end
 
         # tpl__tls_no__start
