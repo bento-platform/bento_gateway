@@ -63,6 +63,9 @@ http {
     limit_req_zone $binary_remote_addr zone=perip:10m rate=10r/s;
     limit_req_zone $server_name zone=perserver:10m rate=40r/s;
 
+    # Static asset rate limiting zone; looser, since pages load many chunks at once
+    limit_req_zone $binary_remote_addr zone=static_perip:10m rate=75r/s;
+
     # Beacon-specific rate limiting zone; much more aggressive
     limit_req_zone $binary_remote_addr zone=beacon_perip:10m rate=1r/s;
 
@@ -167,6 +170,19 @@ http {
         # --
 
         # tpl__use_bento_public__start
+        # Static assets get a looser rate limit than location / (pages load many chunks at once)
+        location ~ ^/(_next/static/|__nextjs_|public/) {
+            limit_req zone=static_perip burst=200 nodelay;
+
+            include /gateway/conf/proxy_common.conf;
+            include /gateway/conf/proxy_large_headers.conf;
+
+            set         $upstream_public http://${BENTO_PUBLIC_CONTAINER_NAME}:${BENTO_PUBLIC_INTERNAL_PORT};
+            proxy_pass  $upstream_public;
+
+            error_log /var/log/bentov2_public_errors.log;
+        }
+
         # Public Web
         location / {
             # Reverse proxy settings
