@@ -67,6 +67,30 @@ envsubst "$(cat ./VARIABLES)" \
   < ./conf/cors.conf.tpl \
   > "${CORS_PATH}"
 
+# Real client IP configuration (included by nginx.conf). CIDR lists may be comma- and/or space-separated.
+#  - BENTO_GATEWAY_TRUSTED_PROXY_CIDRS: no-TLS mode only; load balancer(s) whose X-Forwarded-For header is trusted.
+#  - BENTO_GATEWAY_BFF_CIDRS: network(s) of the bento_public container; X-Forwarded-For from these is used as the
+#    client IP for logging/headers/rate limiting, and these requests are not double-counted in the perip/perserver
+#    rate limits.
+function cidr_lines () {
+  # $1 = CIDR list, $2 = line prefix, $3 = line suffix
+  for cidr in ${1//,/ }; do
+    echo "${2}${cidr}${3}"
+  done
+}
+
+REAL_IP_TRUSTED_PATH="${BENTO_GATEWAY_CONF_DIR}/real_ip_trusted.conf"
+echo "[bento_gateway] [entrypoint] creating ${REAL_IP_TRUSTED_PATH}"
+cidr_lines "${BENTO_GATEWAY_TRUSTED_PROXY_CIDRS}" 'set_real_ip_from ' ';' > "${REAL_IP_TRUSTED_PATH}"
+
+BFF_SUBNETS_PATH="${BENTO_GATEWAY_CONF_DIR}/bff_subnets.conf"
+echo "[bento_gateway] [entrypoint] creating ${BFF_SUBNETS_PATH}"
+cidr_lines "${BENTO_GATEWAY_BFF_CIDRS}" '' ' 1;' > "${BFF_SUBNETS_PATH}"
+if [[ -z "${BENTO_GATEWAY_BFF_CIDRS}" && "$(true_values_to_1 $BENTOV2_USE_BENTO_PUBLIC)" == 1 ]]; then
+  echo "[bento_gateway] [entrypoint] WARNING: BENTO_GATEWAY_BFF_CIDRS is not set; requests made by bento_public" \
+       "will be logged and rate-limited as the bento_public container's IP" 1>&2
+fi
+
 echo "[bento_gateway] [entrypoint] creating nginx.conf.pre"
 envsubst "$(cat ./VARIABLES)" \
   < ./conf/nginx.conf.tpl \

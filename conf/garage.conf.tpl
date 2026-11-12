@@ -1,7 +1,7 @@
 # Main S3 API endpoint (path-style buckets)
 server {
     # tpl__tls_yes__start
-    listen 444 ssl;
+    listen 444 ssl proxy_protocol;
     # tpl__tls_yes__end
 
     # tpl__tls_no__start
@@ -41,7 +41,7 @@ server {
 # Admin API
 server {
     # tpl__tls_yes__start
-    listen 444 ssl;
+    listen 444 ssl proxy_protocol;
     # tpl__tls_yes__end
 
     # tpl__tls_no__start
