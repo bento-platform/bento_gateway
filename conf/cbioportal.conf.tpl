@@ -1,7 +1,7 @@
 server {
     # tpl__tls_yes__start
     # Use 444 for internal SSL to allow streaming back to self (above)
-    listen 444 ssl;
+    listen 444 ssl proxy_protocol;
     # tpl__tls_yes__end
 
     # tpl__tls_no__start
